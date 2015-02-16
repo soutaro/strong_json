@@ -1,6 +1,6 @@
 class StrongJSON
   module Type
-    NONE = Object.new
+    NONE = ::Object.new
 
     class Base
       def initialize(type)
