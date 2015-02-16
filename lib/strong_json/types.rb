@@ -35,5 +35,21 @@ class StrongJSON
     def prohibited
       StrongJSON::Type::Base.new(:prohibited)
     end
+
+    def string?
+      optional(string)
+    end
+
+    def numeric?
+      optional(numeric)
+    end
+
+    def number?
+      optional(number)
+    end
+
+    def boolean?
+      optional(boolean)
+    end
   end
 end
