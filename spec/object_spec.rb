@@ -57,4 +57,14 @@ describe StrongJSON::Type::Object do
       expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::Error)
     end
   end
+
+  describe "#except" do
+    let (:type) { StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:numeric), b: StrongJSON::Type::Base.new(:string)) }
+
+    it "return object which ignores given fields but preserve others" do
+      ty2 = type.except(:a)
+
+      expect(ty2.coerce(a: 123, b: "test")).to eq({ b: "test" })
+    end
+  end
 end

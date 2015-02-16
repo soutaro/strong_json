@@ -102,6 +102,12 @@ class StrongJSON
         Object.new(@fields.merge(fields))
       end
 
+      def except(*keys)
+        Object.new(keys.each.with_object(@fields.dup) do |key, hash|
+                     hash.delete key
+                   end)
+      end
+
       def to_s
         fields = []
 
