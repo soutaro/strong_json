@@ -123,7 +123,8 @@ class StrongJSON
       end
 
       def to_s
-        "Expected type of value at #{path.join('.')} (#{value}) is #{type}"
+        position = " at #{path.join('.')}"
+        "Expected type of value #{value}#{position} is #{type}"
       end
     end
   end
