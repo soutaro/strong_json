@@ -8,7 +8,7 @@ class StrongJSON
   end
 
   def let(name, type)
-    define_method(name) { type }
+    define_singleton_method(name) { type }
   end
 
   include StrongJSON::Types
