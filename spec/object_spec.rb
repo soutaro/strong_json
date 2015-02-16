@@ -15,10 +15,18 @@ describe StrongJSON::Type::Object do
       expect(type.coerce(a: 123, b: true)).to eq(a: 123)
     end
 
-    it "rejects prohibited fields" do
-      type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:prohibited))
+    describe "prohibited" do
+      it "rejects field with any value" do
+        type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:prohibited))
 
-      expect{ type.coerce(a: 123, b: true) }.to raise_error(StrongJSON::Type::Error)
+        expect{ type.coerce(a: 123, b: true) }.to raise_error(StrongJSON::Type::Error)
+      end
+
+      it "accepts if it does not contains the field" do
+        type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:prohibited))
+
+        expect(type.coerce(b: true)).to eq({})
+      end
     end
 
     it "rejects objects with missing fields" do

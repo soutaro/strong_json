@@ -1,14 +1,16 @@
 class StrongJSON
   module Type
+    NONE = Object.new
+
     class Base
       def initialize(type)
         @type = type
       end
 
-      def test(value)
+      def test(value, absent = false)
         case @type
         when :prohibited
-          false
+          NONE.equal?(value)
         when :any
           true
         when :number
@@ -40,7 +42,7 @@ class StrongJSON
       end
 
       def coerce(value, path: [])
-        if value != nil
+        unless value == nil || NONE.equal?(value)
           @type.coerce(value, path: path)
         else
           nil
@@ -85,7 +87,7 @@ class StrongJSON
         result = {}
 
         @fields.each do |name, ty|
-          value = ty.coerce(object[name], path: path + [name])
+          value = ty.coerce(object.has_key?(name) ? object[name] : NONE, path: path + [name])
           result[name] = value if object.has_key?(name)
         end
 
