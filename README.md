@@ -67,6 +67,15 @@ If the input JSON contains `prohibited` attributes, `id` of `item` in the exampl
 * `any` Any value except `nil` is accepted
 * `prohibited` Any value will be rejected
 
+### Shortcuts
+
+There are some alias for `optional(base)`, where base is base types, as the following:
+
+* `number?`
+* `string?`
+* `boolean?`
+* `numeric?`
+
 ## Contributing
 
 1. Fork it ( https://github.com/soutaro/strong_json/fork )
