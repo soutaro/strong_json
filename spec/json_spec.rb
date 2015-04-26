@@ -3,7 +3,7 @@ require "strong_json"
 describe "StrongJSON.new" do
   it "tests the structure of a JSON object" do
     s = StrongJSON.new do
-      let :item, object(name: string, count: numeric, price: numeric)
+      let :item, object(name: string, count: numeric, price: numeric, comment: ignored)
       let :checkout, object(items: array(item), change: optional(number))
     end
 

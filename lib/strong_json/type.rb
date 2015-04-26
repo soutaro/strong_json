@@ -3,14 +3,16 @@ class StrongJSON
     NONE = ::Object.new
 
     class Base
+      attr_reader :type
+
       def initialize(type)
         @type = type
       end
 
-      def test(value, absent = false)
+      def test(value)
         case @type
-        when :prohibited
-          NONE.equal?(value)
+        when :ignored
+          true
         when :any
           true
         when :number
@@ -28,7 +30,7 @@ class StrongJSON
 
       def coerce(value, path: [])
         raise Error.new(value: value, type: self, path: path) unless test(value)
-        value
+        @type != :ignored ? value : NONE
       end
 
       def to_s
@@ -86,12 +88,30 @@ class StrongJSON
 
         result = {}
 
-        @fields.each do |name, ty|
-          value = ty.coerce(object.has_key?(name) ? object[name] : NONE, path: path + [name])
-          result[name] = value if object.has_key?(name)
+        all_keys = (@fields.keys + object.keys).sort.uniq
+        all_keys.each do |key|
+          type = @fields.has_key?(key) ? @fields[key] : NONE
+          value = object.has_key?(key) ? object[key] : NONE
+
+          test_value_type(path + [key], type, value) do |v|
+            result[key] = v
+          end
         end
 
         result
+      end
+
+      def test_value_type(path, type, value)
+        if NONE.equal?(type) && !NONE.equal?(value)
+          raise UnexpectedFieldError.new(path: path, value: value)
+        end
+
+        v = type.coerce(value, path: path)
+
+        return if NONE.equal?(v) || NONE.equal?(type)
+        return if type.is_a?(Optional) && v == nil
+
+        yield(v)
       end
 
       def merge(fields)
@@ -116,6 +136,20 @@ class StrongJSON
         end
 
         "object(#{fields.join(', ')})"
+      end
+    end
+
+    class UnexpectedFieldError < StandardError
+      attr_reader :path, :value
+
+      def initialize(path: , value:)
+        @path = path
+        @value = value
+      end
+
+      def to_s
+        position = "#{path.join('.')}"
+        "Unexpected field of #{position} (#{value})"
       end
     end
 

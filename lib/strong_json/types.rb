@@ -51,5 +51,9 @@ class StrongJSON
     def boolean?
       optional(boolean)
     end
+
+    def ignored
+      StrongJSON::Type::Base.new(:ignored)
+    end
   end
 end
