@@ -2,11 +2,11 @@ require "strong_json"
 
 describe StrongJSON::Type::Base do
   describe "#test" do
-    context ":prohibited" do
-      let (:type) { StrongJSON::Type::Base.new(:prohibited) }
+    context ":ignored" do
+      let (:type) { StrongJSON::Type::Base.new(:ignored) }
 
-      it "rejects number" do
-        expect(type.test(123)).to be_falsey
+      it "can not be placed on toplevel" do
+        expect { type.coerce(3, path: []) }.to raise_error(StrongJSON::Type::IllegalTypeError)
       end
     end
 

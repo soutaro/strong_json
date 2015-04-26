@@ -30,6 +30,7 @@ class StrongJSON
 
       def coerce(value, path: [])
         raise Error.new(value: value, type: self, path: path) unless test(value)
+        raise IllegalTypeError.new(type: self) if path == [] && @type == :ignored
         @type != :ignored ? value : NONE
       end
 
@@ -150,6 +151,18 @@ class StrongJSON
       def to_s
         position = "#{path.join('.')}"
         "Unexpected field of #{position} (#{value})"
+      end
+    end
+
+    class IllegalTypeError < StandardError
+      attr_reader :type
+
+      def initialize(type:)
+        @type = type
+      end
+
+      def to_s
+        "#{type} can not be put on toplevel"
       end
     end
 
