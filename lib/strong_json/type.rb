@@ -176,7 +176,7 @@ class StrongJSON
       end
 
       def to_s
-        position = " at #{path.join('.')}"
+        position = path.empty? ? "" : " at .#{path.join('.')}"
         "Expected type of value #{value}#{position} is #{type}"
       end
     end
