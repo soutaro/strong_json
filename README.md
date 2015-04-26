@@ -3,7 +3,7 @@
 This library allows you to test the structure of JSON objects.
 
 This is similar to Strong Parameters, which is introduced by Rails 4, but expected to work with more complex structures.
-It may help you to understand what this is as: Strong Parameter is for simple structures, like HTML forms, and StrongJSON is for complex structures, like JSON objects posted to API.
+It may help you to understand what this is as: Strong Parameters is for simple structures, like HTML forms, and StrongJSON is for complex structures, like JSON objects posted to API.
 
 ## Installation
 
@@ -33,12 +33,11 @@ end
 json = s.order.coerce(JSON.parse(input))
 ```
 
-If the input JSON data is conformant with `order`'s structure, the `json` will be that value.
+If the input JSON data conforms to `order`'s structure, the `json` will be that value.
 
-If the input JSON contains attributes which is not white-listed in the definition, the fields will be droped.
+If the input JSON contains attributes which is not white-listed in the definition, it will raise an exception.
 
 If an attribute has a value which does not match with given type, the `coerce` method call will raise an exception `StrongJSON::Type::Error`.
-If the input JSON contains `prohibited` attributes, `id` of `item` in the example, it also will result in an exception.
 
 ## Catalogue of Types
 
@@ -46,7 +45,7 @@ If the input JSON contains `prohibited` attributes, `id` of `item` in the exampl
 
 * The value must be an object
 * Fields, `f1`, `f2`, and ..., must be present and its values must be of `type1`, `type2`, ..., respectively
-* Other fields will be ignored
+* Objects with other fields will be rejected
 
 ### array(type)
 
@@ -65,7 +64,7 @@ If the input JSON contains `prohibited` attributes, `id` of `item` in the exampl
 * `boolean` The value must be `true` or `false`
 * `numeric` The value must be an instance of `Numeric` or a string which represents a number
 * `any` Any value except `nil` is accepted
-* `prohibited` Any value will be rejected
+* `ignored` Any value will be ignored
 
 ### Shortcuts
 
