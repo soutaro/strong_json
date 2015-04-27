@@ -110,7 +110,7 @@ class StrongJSON
         v = type.coerce(value, path: path)
 
         return if NONE.equal?(v) || NONE.equal?(type)
-        return if type.is_a?(Optional) && v == nil
+        return if type.is_a?(Optional) && NONE.equal?(value)
 
         yield(v)
       end

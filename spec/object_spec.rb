@@ -32,11 +32,22 @@ describe StrongJSON::Type::Object do
 
       expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::Error)
     end
+  end
 
+  describe "optional" do
     it "accepts missing field if optional" do
       type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Optional.new(StrongJSON::Type::Base.new(:numeric)))
-
       expect(type.coerce({})).to eq({})
+    end
+
+    it "preserves if present" do
+      type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Optional.new(StrongJSON::Type::Base.new(:numeric)))
+      expect(type.coerce({ a: "-123" })).to eq({ a: "-123" })
+    end
+
+    it "preserves nil if present" do
+      type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Optional.new(StrongJSON::Type::Base.new(:numeric)))
+      expect(type.coerce({ a: nil })).to eq({ a: nil })
     end
   end
 
