@@ -73,6 +73,18 @@ describe StrongJSON::Type::Base do
         expect(type.test("123")).to be_truthy
       end
 
+      it "accepts negative number" do
+        expect(type.test("-123")).to be_truthy
+      end
+
+      it "accepts number with plus sign" do
+        expect(type.test("+123")).to be_truthy
+      end
+
+      it "accepts decimal number" do
+        expect(type.test("0.3")).to be_truthy
+      end
+
       it "rejects non numeric format string" do
         expect(type.test("test")).to be_falsey
       end

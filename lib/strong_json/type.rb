@@ -22,7 +22,7 @@ class StrongJSON
         when :boolean
           value == true || value == false
         when :numeric
-          value.is_a?(Numeric) || value.is_a?(String) && /\A[\d.]+\Z/ =~ value
+          value.is_a?(Numeric) || value.is_a?(String) && /\A[\-\+]?[\d.]+\Z/ =~ value
         else
           false
         end
