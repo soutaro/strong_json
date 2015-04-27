@@ -75,6 +75,11 @@ There are some alias for `optional(base)`, where base is base types, as the foll
 * `boolean?`
 * `numeric?`
 
+Shorthands for `optional(array(ty))` and `optional(object(fields))` are also defined as the following:
+
+* `array?(ty)`
+* `object?(fields)`
+
 ## Contributing
 
 1. Fork it ( https://github.com/soutaro/strong_json/fork )

@@ -55,5 +55,13 @@ class StrongJSON
     def ignored
       StrongJSON::Type::Base.new(:ignored)
     end
+
+    def array?(ty)
+      optional(array(ty))
+    end
+
+    def object?(fields)
+      optional(object(fields))
+    end
   end
 end
