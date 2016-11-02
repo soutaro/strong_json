@@ -2,7 +2,18 @@ class StrongJSON
   module Type
     NONE = ::Object.new
 
+    module Match
+      def =~(value)
+        coerce(value)
+        true
+      rescue
+        false
+      end
+    end
+
     class Base
+      include Match
+
       attr_reader :type
 
       def initialize(type)
@@ -40,6 +51,8 @@ class StrongJSON
     end
 
     class Optional
+      include Match
+
       def initialize(type)
         @type = type
       end
@@ -58,6 +71,8 @@ class StrongJSON
     end
 
     class Array
+      include Match
+
       def initialize(type)
         @type = type
       end
@@ -78,6 +93,8 @@ class StrongJSON
     end
 
     class Object
+      include Match
+
       def initialize(fields)
         @fields = fields
       end

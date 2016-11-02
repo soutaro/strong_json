@@ -35,4 +35,16 @@ describe StrongJSON::Type::Array, "#coerce" do
 
     expect { type.coerce(nil) }.to raise_error(StrongJSON::Type::Error)
   end
+
+  describe "=~" do
+    it "returns true for array" do
+      type = StrongJSON::Type::Array.new(StrongJSON::Type::Base.new(:number))
+      expect(type =~ []).to be_truthy
+    end
+
+    it "returns false for number" do
+      type = StrongJSON::Type::Array.new(StrongJSON::Type::Base.new(:number))
+      expect(type =~ 3.0).to be_falsey
+    end
+  end
 end

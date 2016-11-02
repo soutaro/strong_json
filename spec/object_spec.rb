@@ -75,4 +75,16 @@ describe StrongJSON::Type::Object do
       expect(ty2.coerce(b: "test")).to eq({ b: "test" })
     end
   end
+
+  describe "=~" do
+    let (:type) { StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:numeric), b: StrongJSON::Type::Base.new(:string)) }
+
+    it "returns true for valid object" do
+      expect(type =~ { a: 3, b: "foo" }).to be_truthy
+    end
+
+    it "returns false for invalid number" do
+      expect(type =~ {}).to be_falsey
+    end
+  end
 end
