@@ -44,6 +44,10 @@ class StrongJSON
       StrongJSON::Type::Literal.new(value)
     end
 
+    def enum(*types)
+      StrongJSON::Type::Enum.new(types)
+    end
+
     def string?
       optional(string)
     end

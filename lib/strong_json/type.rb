@@ -186,6 +186,30 @@ class StrongJSON
       end
     end
 
+    class Enum
+      include Match
+
+      attr_reader :types
+
+      def initialize(types)
+        @types = types
+      end
+
+      def to_s
+        "enum(#{types.map(&:to_s).join(", ")})"
+      end
+
+      def coerce(value, path: [])
+        type = types.find {|ty| ty =~ value }
+
+        if type
+          type.coerce(value, path: path)
+        else
+          raise Error.new(path: path, type: self, value: value)
+        end
+      end
+    end
+
     class UnexpectedFieldError < StandardError
       attr_reader :path, :value
 
