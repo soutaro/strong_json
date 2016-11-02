@@ -80,6 +80,25 @@ class StrongJSON
       end
     end
 
+    class Literal
+      include Match
+
+      attr_reader :value
+
+      def initialize(value)
+        @value = value
+      end
+
+      def to_s
+        "literal(#{@value})"
+      end
+
+      def coerce(value, path: [])
+        raise Error.new(path: path, type: self, value: value) unless self.value == value
+        value
+      end
+    end
+
     class Array
       include Match
 

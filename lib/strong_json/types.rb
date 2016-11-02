@@ -40,6 +40,10 @@ class StrongJSON
       StrongJSON::Type::Base.new(:symbol)
     end
 
+    def literal(value)
+      StrongJSON::Type::Literal.new(value)
+    end
+
     def string?
       optional(string)
     end
@@ -70,6 +74,10 @@ class StrongJSON
 
     def object?(fields)
       optional(object(fields))
+    end
+
+    def literal?(value)
+      optional(literal(value))
     end
   end
 end
