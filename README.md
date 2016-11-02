@@ -30,7 +30,8 @@ s = StrongJSON.new do
   let :order, object(customer: customer, items: array(item))
 end
 
-json = s.order.coerce(JSON.parse(input))
+json = s.order.coerce(JSON.parse(input), symbolize_names: true)
+s.order =~ JSON.parse(input, symbolize_names: true)
 ```
 
 If the input JSON data conforms to `order`'s structure, the `json` will be that value.
@@ -57,6 +58,11 @@ If an attribute has a value which does not match with given type, the `coerce` m
 * The value can be `nil` (or not contained in an object)
 * If an value exists, it must be of given `type`
 
+### enum(type1, type2, ...)
+
+* The value can be one of the given types
+* First successfully coerced value will return
+
 ### Base types
 
 * `number` The value must be an instance of `Numeric`
@@ -65,6 +71,11 @@ If an attribute has a value which does not match with given type, the `coerce` m
 * `numeric` The value must be an instance of `Numeric` or a string which represents a number
 * `any` Any value except `nil` is accepted
 * `ignored` Any value will be ignored
+* `symbol` The value must be an instance of `String` or `Symbol`; returns the result ot `#to_sym`
+
+### Literals
+
+* `literal(lit)` The value must `=== lit`
 
 ### Shortcuts
 
@@ -74,6 +85,8 @@ There are some alias for `optional(base)`, where base is base types, as the foll
 * `string?`
 * `boolean?`
 * `numeric?`
+* `symbol?`
+* `literal?(lit)`
 
 Shorthands for `optional(array(ty))` and `optional(object(fields))` are also defined as the following:
 
