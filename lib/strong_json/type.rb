@@ -34,6 +34,8 @@ class StrongJSON
           value == true || value == false
         when :numeric
           value.is_a?(Numeric) || value.is_a?(String) && /\A[\-\+]?[\d.]+\Z/ =~ value
+        when :symbol
+          value.is_a?(String) || value.is_a?(Symbol)
         else
           false
         end
@@ -42,7 +44,15 @@ class StrongJSON
       def coerce(value, path: [])
         raise Error.new(value: value, type: self, path: path) unless test(value)
         raise IllegalTypeError.new(type: self) if path == [] && @type == :ignored
-        @type != :ignored ? value : NONE
+
+        case type
+        when :ignored
+          NONE
+        when :symbol
+          value.to_sym
+        else
+          value
+        end
       end
 
       def to_s

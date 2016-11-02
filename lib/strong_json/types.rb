@@ -36,6 +36,10 @@ class StrongJSON
       StrongJSON::Type::Base.new(:prohibited)
     end
 
+    def symbol
+      StrongJSON::Type::Base.new(:symbol)
+    end
+
     def string?
       optional(string)
     end
@@ -50,6 +54,10 @@ class StrongJSON
 
     def boolean?
       optional(boolean)
+    end
+
+    def symbol?
+      optional(symbol)
     end
 
     def ignored

@@ -143,5 +143,39 @@ describe StrongJSON::Type::Base do
         end
       end
     end
+
+    context ":symbol" do
+      let (:type) { StrongJSON::Type::Base.new(:symbol) }
+
+      describe "#test" do
+        it "returns true for string" do
+          expect(type.test("foo")).to be_truthy
+        end
+
+        it "returns true for symbol" do
+          expect(type.test(:foo)).to be_truthy
+        end
+
+        it "returns false for boolean" do
+          expect(type.test(false)).to be_falsey
+        end
+      end
+
+      describe "#=~" do
+        it "returns true for string" do
+          expect(type =~ 'foo').to be_truthy
+        end
+
+        it "returns false for number" do
+          expect(type =~ 3).to be_falsey
+        end
+      end
+
+      describe "#coerce" do
+        it "returns symbol" do
+          expect(type.coerce("foo")).to eq(:foo)
+        end
+      end
+    end
   end
 end
