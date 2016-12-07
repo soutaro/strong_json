@@ -26,7 +26,7 @@ Or install it yourself as:
 ```ruby
 s = StrongJSON.new do
   let :item, object(id: prohibited, name: string, count: numeric)
-  let :custoemr, object(name: string, address: string, phone: string, email: optional(string))
+  let :customer, object(name: string, address: string, phone: string, email: optional(string))
   let :order, object(customer: customer, items: array(item))
 end
 
