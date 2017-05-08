@@ -9,6 +9,10 @@ class StrongJSON
       rescue
         false
       end
+
+      def ===(value)
+        self =~ value
+      end
     end
 
     class Base

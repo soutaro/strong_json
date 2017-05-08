@@ -32,6 +32,15 @@ end
 
 json = s.order.coerce(JSON.parse(input), symbolize_names: true)
 s.order =~ JSON.parse(input, symbolize_names: true)
+
+case JSON.parse(input2, symbolize_names: true)
+when s.item
+  # input2 is an item
+when s.customer
+  # input2 is a customer
+else
+  # input2 is something else
+end
 ```
 
 If the input JSON data conforms to `order`'s structure, the `json` will be that value.
