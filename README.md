@@ -30,7 +30,7 @@ s = StrongJSON.new do
   let :order, object(customer: customer, items: array(item))
 end
 
-json = s.order.coerce(JSON.parse(input), symbolize_names: true)
+json = s.order.coerce(JSON.parse(input, symbolize_names: true))
 s.order =~ JSON.parse(input, symbolize_names: true)
 
 case JSON.parse(input2, symbolize_names: true)
