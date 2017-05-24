@@ -139,10 +139,14 @@ class StrongJSON
 
         result = {}
 
-        all_keys = (@fields.keys + object.keys).sort.uniq
-        all_keys.each do |key|
-          type = @fields.has_key?(key) ? @fields[key] : NONE
-          value = object.has_key?(key) ? object[key] : NONE
+        object.each do |key, value|
+          unless @fields.key?(key)
+            raise UnexpectedFieldError.new(path: path + [key], value: value)
+          end
+        end
+
+        @fields.each do |key, type|
+          value = object.key?(key) ? object[key] : NONE
 
           test_value_type(path + [key], type, value) do |v|
             result[key] = v
@@ -153,10 +157,6 @@ class StrongJSON
       end
 
       def test_value_type(path, type, value)
-        if NONE.equal?(type) && !NONE.equal?(value)
-          raise UnexpectedFieldError.new(path: path, value: value)
-        end
-
         v = type.coerce(value, path: path)
 
         return if NONE.equal?(v) || NONE.equal?(type)

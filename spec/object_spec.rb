@@ -30,7 +30,7 @@ describe StrongJSON::Type::Object do
     it "rejects objects with missing fields" do
       type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:numeric))
 
-      expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::Error)
+      expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::UnexpectedFieldError)
     end
   end
 

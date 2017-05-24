@@ -57,6 +57,26 @@ If an attribute has a value which does not match with given type, the `coerce` m
 * Fields, `f1`, `f2`, and ..., must be present and its values must be of `type1`, `type2`, ..., respectively
 * Objects with other fields will be rejected
 
+#### Performance hint
+
+Object attributes test is done in order of the keys.
+
+```ruby
+slower_object = enum(
+  object(id: numeric, created_at: string, updated_at: string, type: literal("person"), name: string),
+  object(id: numeric, created_at: string, updated_at: string, type: literal("food"), object: any)
+)
+
+faster_object = enum(
+  object(type: literal("person"), id: numeric, created_at: string, updated_at: string, name: string),
+  object(type: literal("food"), id: numeric, created_at: string, updated_at: string, object: any)
+)
+```
+
+The two enums represents same object, but testing runs faster with `faster_object`.
+Objects in `faster_object` have `type` attribute as their first keys.
+Testing `type` is done first, and it soon determines if the object is `"person"` or `"food"`.
+
 ### array(type)
 
 * The value must be an array
