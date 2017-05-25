@@ -104,7 +104,7 @@ Testing `type` is done first, and it soon determines if the object is `"person"`
 
 ### Literals
 
-* `literal(lit)` The value must `=== lit`
+* `literal(lit)` The value must `== lit`
 
 ### Shortcuts
 
