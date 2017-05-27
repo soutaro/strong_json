@@ -204,10 +204,15 @@ class StrongJSON
       end
 
       def coerce(value, path: [])
-        type = types.find {|ty| ty =~ value }
+        result = types.find do |ty|
+          begin
+            break ty.coerce(value)
+          rescue UnexpectedFieldError, IllegalTypeError, Error # rubocop:disable Lint/HandleExceptions
+          end
+        end
 
-        if type
-          type.coerce(value, path: path)
+        if result
+          result
         else
           raise Error.new(path: path, type: self, value: value)
         end
