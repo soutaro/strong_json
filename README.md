@@ -116,6 +116,7 @@ There are some alias for `optional(base)`, where base is base types, as the foll
 * `numeric?`
 * `symbol?`
 * `literal?(lit)`
+* `any?`
 
 Shorthands for `optional(array(ty))` and `optional(object(fields))` are also defined as the following:
 
