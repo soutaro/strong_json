@@ -32,6 +32,10 @@ class StrongJSON
       StrongJSON::Type::Base.new(:any)
     end
 
+    def any?
+      optional(any)
+    end
+
     def prohibited
       StrongJSON::Type::Base.new(:prohibited)
     end
