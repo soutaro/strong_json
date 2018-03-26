@@ -65,6 +65,18 @@ describe StrongJSON::Type::Object do
 
       expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::Error)
     end
+
+    it "adds field via object" do
+      ty2 = type.merge(StrongJSON::Type::Object.new(b: StrongJSON::Type::Base.new(:string)))
+
+      expect(ty2.coerce(a: 123, b: "test")).to eq(a: 123, b: "test")
+    end
+
+    it "overrides field via object" do
+      ty2 = type.merge(StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:prohibited)))
+
+      expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::Error)
+    end
   end
 
   describe "#except" do

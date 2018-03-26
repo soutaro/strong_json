@@ -167,7 +167,7 @@ class StrongJSON
 
       def merge(fields)
         if fields.is_a?(Object)
-          fields = Object.instance_variable_get("@fields")
+          fields = fields.instance_variable_get("@fields")
         end
 
         Object.new(@fields.merge(fields))
