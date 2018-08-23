@@ -118,10 +118,11 @@ There are some alias for `optional(base)`, where base is base types, as the foll
 * `literal?(lit)`
 * `any?`
 
-Shorthands for `optional(array(ty))` and `optional(object(fields))` are also defined as the following:
+Shortcuts for complex data are also defined as the following:
 
-* `array?(ty)`
-* `object?(fields)`
+* `optional(array(ty))` → `array?(ty)`
+* `optional(object(fields))` → `object?(fields)`
+* `optional(enum(types))` → `enum?(types)`
 
 ## Contributing
 
