@@ -87,5 +87,9 @@ class StrongJSON
     def literal?(value)
       optional(literal(value))
     end
+
+    def enum?(*types)
+      optional(enum(*types))
+    end
   end
 end
