@@ -80,7 +80,7 @@ class StrongJSON
       end
 
       def to_s
-        "optinal(#{@type})"
+        "optional(#{@type})"
       end
     end
 
@@ -211,10 +211,10 @@ class StrongJSON
           end
         end
 
-        if result
-          result
-        else
+        if result.nil?
           raise Error.new(path: path, type: self, value: value)
+        else
+          result
         end
       end
     end
