@@ -26,7 +26,9 @@ describe StrongJSON::Type::Enum do
                                    StrongJSON::Type::Object.new(id: StrongJSON::Type::Literal.new("id1"),
                                                                 value: StrongJSON::Type::Base.new(:string)),
                                    StrongJSON::Type::Object.new(id: StrongJSON::Type::Base.new(:string),
-                                                                value: StrongJSON::Type::Base.new(:symbol))
+                                                                value: StrongJSON::Type::Base.new(:symbol)),
+                                   StrongJSON::Type::Optional.new(StrongJSON::Type::Literal.new(3)),
+                                   StrongJSON::Type::Literal.new(false),
                                  ])
     }
 
@@ -36,6 +38,14 @@ describe StrongJSON::Type::Enum do
 
     it "returns object with symbol value" do
       expect(type.coerce({id: "id2", value: "foo" })).to eq({ id: "id2", value: :foo })
+    end
+
+    it "accepts false" do
+      expect(type.coerce(false)).to eq(false)
+    end
+
+    it "accepts nil" do
+      expect(type.coerce(nil)).to eq(nil)
     end
 
     it "raises error" do
