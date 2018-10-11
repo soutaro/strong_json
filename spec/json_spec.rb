@@ -12,14 +12,14 @@ describe "StrongJSON.new" do
 
   it "tests enums" do
     s = StrongJSON.new do
-      let :enum, object(e1: enum(string, number), e2: enum?(literal(1), literal(2)))
+      let :enum, object(e1: enum(boolean, number), e2: enum?(literal(1), literal(2)))
     end
 
-    expect(s.enum.coerce(e1: "")).to eq(e1: "")
+    expect(s.enum.coerce(e1: false)).to eq(e1: false)
     expect(s.enum.coerce(e1: 0)).to eq(e1: 0)
     expect(s.enum.coerce(e1: 0, e2: 1)).to eq(e1: 0, e2: 1)
     expect(s.enum.coerce(e1: 0, e2: 2)).to eq(e1: 0, e2: 2)
-    expect{ s.enum.coerce(e1: false) }.to raise_error(StrongJSON::Type::Error)
     expect{ s.enum.coerce(e1: "", e2: 3) }.to raise_error(StrongJSON::Type::Error)
+    expect{ s.enum.coerce(e1: false, e2: "") }.to raise_error(StrongJSON::Type::Error)
   end
 end
