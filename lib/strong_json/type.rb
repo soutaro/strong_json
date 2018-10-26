@@ -18,6 +18,7 @@ class StrongJSON
     class Base
       include Match
 
+      # @dynamic type
       attr_reader :type
 
       def initialize(type)
@@ -87,6 +88,7 @@ class StrongJSON
     class Literal
       include Match
 
+      # @dynamic value
       attr_reader :value
 
       def initialize(value)
@@ -98,7 +100,7 @@ class StrongJSON
       end
 
       def coerce(value, path: [])
-        raise Error.new(path: path, type: self, value: value) unless self.value == value
+        raise Error.new(path: path, type: self, value: value) unless (_ = self.value) == value
         value
       end
     end
@@ -137,6 +139,7 @@ class StrongJSON
           raise Error.new(path: path, type: self, value: object)
         end
 
+        # @type var result: ::Hash<Symbol, any>
         result = {}
 
         object.each do |key, value|
@@ -153,7 +156,7 @@ class StrongJSON
           end
         end
 
-        result
+        _ = result
       end
 
       def test_value_type(path, type, value)
@@ -166,11 +169,16 @@ class StrongJSON
       end
 
       def merge(fields)
-        if fields.is_a?(Object)
-          fields = fields.instance_variable_get("@fields")
-        end
+        # @type var fs: Hash<Symbol, _Schema<any>>
 
-        Object.new(@fields.merge(fields))
+        fs = case fields
+             when Object
+               fields.instance_variable_get(:"@fields")
+             when Hash
+               fields
+             end
+
+        Object.new(@fields.merge(fs))
       end
 
       def except(*keys)
@@ -180,6 +188,7 @@ class StrongJSON
       end
 
       def to_s
+        # @type var fields: ::Array<String>
         fields = []
 
         @fields.each do |name, type|
@@ -193,6 +202,7 @@ class StrongJSON
     class Enum
       include Match
 
+      # @dynamic types
       attr_reader :types
 
       def initialize(types)
@@ -216,6 +226,7 @@ class StrongJSON
     end
 
     class UnexpectedFieldError < StandardError
+      # @dynamic path, value
       attr_reader :path, :value
 
       def initialize(path: , value:)
@@ -230,6 +241,7 @@ class StrongJSON
     end
 
     class IllegalTypeError < StandardError
+      # @dynamic type
       attr_reader :type
 
       def initialize(type:)
@@ -242,6 +254,7 @@ class StrongJSON
     end
 
     class Error < StandardError
+      # @dynamic path, type, value
       attr_reader :path, :type, :value
 
       def initialize(path:, type:, value:)
