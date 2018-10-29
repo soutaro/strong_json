@@ -124,6 +124,59 @@ Shortcuts for complex data are also defined as the following:
 * `optional(object(fields))` → `object?(fields)`
 * `optional(enum(types))` → `enum?(types)`
 
+## Type checking
+
+StrongJSON ships with type definitions for [Steep](https://github.com/soutaro/steep).
+You can type check your programs using StrongJSON by Steep.
+
+### Type definition
+
+Define your types as the following.
+
+```
+class JSONSchema::Account < StrongJSON
+  def account: -> StrongJSON::_Schema<{ id: Integer, name: String }>
+end
+
+Schema: JSONSchema::Account
+```
+
+And write your schema definition as the following.
+
+```rb
+Schema = _ = StrongJSON.new do
+  # @type self: JSONSchema::Account
+
+  let :account, object(id: number, name: string)
+end
+
+id = Schema.account.coerce(hash)[:id]       # id is Integer
+name = Schema.account.coerce(hash)[:name]   # name is String
+```
+
+Note that you need two tricks:
+
+* A cast `_ = StrongJSON.new ...` on assignment to `Schema` constant
+* A `@type self` annotation in the block
+
+See the `example` directory.
+
+### Commandline
+
+Steep 0.8.1 supports loading type definitions from gems.
+
+Pass `-G` option to type check your program.
+
+```
+$ steep check -G strong_json lib
+```
+
+When you are using `bundler`, it automatically detects that StrongJSON has type definitions.
+
+```
+$ bundle exec steep check lib
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/soutaro/strong_json/fork )

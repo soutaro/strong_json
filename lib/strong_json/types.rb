@@ -1,13 +1,16 @@
 class StrongJSON
   module Types
+    # @type method object: (?Hash<Symbol, ty>) -> _Schema<any>
     def object(fields = {})
       Type::Object.new(fields)
     end
 
+    # @type method array: (?ty) -> _Schema<any>
     def array(type = any)
       Type::Array.new(type)
     end
 
+    # @type method optional: (?ty) -> _Schema<any>
     def optional(type = any)
       Type::Optional.new(type)
     end
