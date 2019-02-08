@@ -59,12 +59,15 @@ class StrongJSON::Type::Object<'t>
   def except: (*Symbol) -> Object<any>
 end
 
+type StrongJSON::Type::detector = ^(any) -> _Schema<any>?
+
 class StrongJSON::Type::Enum<'t>
   include Match
 
   attr_reader types: ::Array<_Schema<any>>
+  attr_reader detector: detector?
 
-  def initialize: (::Array<_Schema<any>>) -> any
+  def initialize: (::Array<_Schema<any>>, ?detector?) -> any
   def coerce: (any, ?path: ::Array<Symbol>) -> 't
 end
 

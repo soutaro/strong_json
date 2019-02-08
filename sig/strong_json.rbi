@@ -37,8 +37,8 @@ module StrongJSON::Types
   def array?: <'x> (_Schema<'x>) -> Type::Optional<::Array<'x>>
   def literal: <'x> ('x) -> Type::Literal<'x>
   def literal?: <'x> ('x) -> Type::Optional<'x>
-  def enum: <'x> (*_Schema<any>) -> Type::Enum<'x>
-  def enum?: <'x> (*_Schema<any>) -> Type::Optional<'x>
+  def enum: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Enum<'x>
+  def enum?: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Optional<'x>
   def ignored: () -> _Schema<nil>
   def prohibited: () -> _Schema<nil>
 end
