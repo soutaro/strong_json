@@ -202,11 +202,13 @@ class StrongJSON
     class Enum
       include Match
 
-      # @dynamic types
+      # @dynamic types, detector
       attr_reader :types
+      attr_reader :detector
 
-      def initialize(types)
+      def initialize(types, detector = nil)
         @types = types
+        @detector = detector
       end
 
       def to_s
@@ -214,6 +216,13 @@ class StrongJSON
       end
 
       def coerce(value, path: [])
+        if d = detector
+          type = d[value]
+          if type && types.include?(type)
+            return type.coerce(value, path: path)
+          end
+        end
+
         types.each do |ty|
           begin
             return ty.coerce(value, path: path)

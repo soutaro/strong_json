@@ -51,8 +51,8 @@ class StrongJSON
       StrongJSON::Type::Literal.new(value)
     end
 
-    def enum(*types)
-      StrongJSON::Type::Enum.new(types)
+    def enum(*types, detector: nil)
+      StrongJSON::Type::Enum.new(types, detector)
     end
 
     def string?
@@ -91,8 +91,8 @@ class StrongJSON
       optional(literal(value))
     end
 
-    def enum?(*types)
-      optional(enum(*types))
+    def enum?(*types, detector: nil)
+      optional(enum(*types, detector: detector))
     end
   end
 end

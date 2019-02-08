@@ -51,5 +51,59 @@ describe StrongJSON::Type::Enum do
     it "raises error" do
       expect { type.coerce(3.14) }.to raise_error(StrongJSON::Type::Error)
     end
+
+    context "with detector" do
+      let(:regexp_pattern) {
+        StrongJSON::Type::Object.new(
+          regexp: StrongJSON::Type::Base.new(:string),
+          option: StrongJSON::Type::Base.new(:string),
+          )
+      }
+
+      let(:literal_pattern) {
+        StrongJSON::Type::Object.new(literal: StrongJSON::Type::Base.new(:string))
+      }
+
+      let(:type) {
+        StrongJSON::Type::Enum.new(
+          [
+            regexp_pattern,
+            literal_pattern,
+            StrongJSON::Type::Base.new(:string),
+          ],
+          -> (value) {
+            case value
+            when Hash
+              case
+              when value.key?(:regexp)
+                regexp_pattern
+              when value.key?(:literal)
+                literal_pattern
+              end
+            end
+          }
+        )
+      }
+
+      it "accepts regexp pattern" do
+        expect(type.coerce({ regexp: "foo", option: "x" })).to eq({regexp: "foo", option: "x"})
+      end
+
+      it "raises error with base type" do
+        expect {
+          type.coerce({ regexp: "foo", option: 3 })
+        }.to raise_error(StrongJSON::Type::Error) {|x|
+          expect(x.type).to be_a(StrongJSON::Type::Base)
+        }
+      end
+
+      it "raises error with enum type" do
+        expect {
+          type.coerce({ option: 3 })
+        }.to raise_error(StrongJSON::Type::Error) {|x|
+          expect(x.type).to eq(type)
+        }
+      end
+    end
   end
 end
