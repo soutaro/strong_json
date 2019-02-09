@@ -17,7 +17,7 @@ class StrongJSON::Type::Base<'a>
 
   def initialize: (base_type_name) -> any
   def test: (any) -> bool
-  def coerce: (any, ?path: ::Array<Symbol>) -> 'a
+  def coerce: (any, ?path: ErrorPath) -> 'a
 end
 
 class StrongJSON::Type::Optional<'t>
@@ -26,7 +26,7 @@ class StrongJSON::Type::Optional<'t>
   @type: _Schema<'t>
 
   def initialize: (_Schema<'t>) -> any
-  def coerce: (any, ?path: ::Array<Symbol>) -> ('t | nil)
+  def coerce: (any, ?path: ErrorPath) -> ('t | nil)
 end
 
 class StrongJSON::Type::Literal<'t>
@@ -35,7 +35,7 @@ class StrongJSON::Type::Literal<'t>
   attr_reader value: 't
 
   def initialize: ('t) -> any
-  def coerce: (any, ?path: ::Array<Symbol>) -> 't
+  def coerce: (any, ?path: ErrorPath) -> 't
 end
 
 class StrongJSON::Type::Array<'t>
@@ -44,7 +44,7 @@ class StrongJSON::Type::Array<'t>
   @type: _Schema<'t>
 
   def initialize: (_Schema<'t>) -> any
-  def coerce: (any, ?path: ::Array<Symbol>) -> ::Array<'t>
+  def coerce: (any, ?path: ErrorPath) -> ::Array<'t>
 end
 
 class StrongJSON::Type::Object<'t>
@@ -53,8 +53,8 @@ class StrongJSON::Type::Object<'t>
   @fields: Hash<Symbol, _Schema<'t>>
 
   def initialize: (Hash<Symbol, _Schema<'t>>) -> any
-  def coerce: (any, ?path: ::Array<Symbol>) -> 't
-  def test_value_type: <'x, 'y> (::Array<Symbol>, _Schema<'x>, any) { ('x) -> 'y } -> 'y
+  def coerce: (any, ?path: ErrorPath) -> 't
+  def test_value_type: <'x, 'y> (ErrorPath, _Schema<'x>, any) { ('x) -> 'y } -> 'y
   def merge: (Object<any> | Hash<Symbol, _Schema<any>>) -> Object<any>
   def except: (*Symbol) -> Object<any>
 end
@@ -68,25 +68,38 @@ class StrongJSON::Type::Enum<'t>
   attr_reader detector: detector?
 
   def initialize: (::Array<_Schema<any>>, ?detector?) -> any
-  def coerce: (any, ?path: ::Array<Symbol>) -> 't
+  def coerce: (any, ?path: ErrorPath) -> 't
 end
 
-class StrongJSON::Type::Error
-  attr_reader path: ::Array<Symbol>
-  attr_reader type: ty
+class StrongJSON::Type::ErrorPath
+  attr_reader type: _Schema<any>
+  attr_reader parent: [Symbol | Integer | nil, instance]?
+
+  def initialize: (type: _Schema<any>, parent: [Symbol | Integer | nil, instance]?) -> any
+  def (constructor) dig: (key: Symbol | Integer, type: _Schema<any>) -> self
+  def (constructor) expand: (type: _Schema<any>) -> self
+
+  def self.root: (_Schema<any>) -> instance
+  def root?: -> bool
+end
+
+class StrongJSON::Type::TypeError < StandardError
+  attr_reader path: ErrorPath
   attr_reader value: any
 
-  def initialize: (path: ::Array<Symbol>, type: ty, value: any) -> any
+  def initialize: (path: ErrorPath, value: any) -> any
+  def type: -> _Schema<any>
 end
 
-class StrongJSON::Type::UnexpectedFieldError
-  attr_reader path: ::Array<Symbol>
-  attr_reader value: any
+class StrongJSON::Type::UnexpectedAttributeError < StandardError
+  attr_reader path: ErrorPath
+  attr_reader attribute: Symbol
 
-  def initialize: (path: ::Array<Symbol>, value: any) -> any
+  def initialize: (path: ErrorPath, attribute: Symbol) -> any
+  def type: -> _Schema<any>
 end
 
-class StrongJSON::Type::IllegalTypeError
+class StrongJSON::Type::IllegalTopTypeError < StandardError
   attr_reader type: ty
   def initialize: (type: ty) -> any
 end

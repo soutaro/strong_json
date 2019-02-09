@@ -19,7 +19,11 @@ describe "StrongJSON.new" do
     expect(s.enum.coerce(e1: 0)).to eq(e1: 0)
     expect(s.enum.coerce(e1: 0, e2: 1)).to eq(e1: 0, e2: 1)
     expect(s.enum.coerce(e1: 0, e2: 2)).to eq(e1: 0, e2: 2)
-    expect{ s.enum.coerce(e1: "", e2: 3) }.to raise_error(StrongJSON::Type::Error)
-    expect{ s.enum.coerce(e1: false, e2: "") }.to raise_error(StrongJSON::Type::Error)
+    expect{ s.enum.coerce(e1: "", e2: 3) }.to raise_error(StrongJSON::Type::TypeError) {|e|
+      expect(e.path.to_s).to eq("$.e1")
+    }
+    expect{ s.enum.coerce(e1: false, e2: "") }.to raise_error(StrongJSON::Type::TypeError) {|e|
+      expect(e.path.to_s).to eq("$.e2")
+    }
   end
 end

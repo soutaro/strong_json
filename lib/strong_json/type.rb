@@ -46,9 +46,9 @@ class StrongJSON
         end
       end
 
-      def coerce(value, path: [])
-        raise Error.new(value: value, type: self, path: path) unless test(value)
-        raise IllegalTypeError.new(type: self) if path == [] && @type == :ignored
+      def coerce(value, path: ErrorPath.root(self))
+        raise TypeError.new(value: value, path: path) unless test(value)
+        raise IllegalTopTypeError.new(type: self) if path.root? && @type == :ignored
 
         case type
         when :ignored
@@ -72,9 +72,9 @@ class StrongJSON
         @type = type
       end
 
-      def coerce(value, path: [])
+      def coerce(value, path: ErrorPath.root(self))
         unless value == nil || NONE.equal?(value)
-          @type.coerce(value, path: path)
+          @type.coerce(value, path: path.expand(type: @type))
         else
           nil
         end
@@ -99,8 +99,8 @@ class StrongJSON
         "literal(#{@value})"
       end
 
-      def coerce(value, path: [])
-        raise Error.new(path: path, type: self, value: value) unless (_ = self.value) == value
+      def coerce(value, path: ErrorPath.root(self))
+        raise TypeError.new(path: path, value: value) unless (_ = self.value) == value
         value
       end
     end
@@ -112,13 +112,13 @@ class StrongJSON
         @type = type
       end
 
-      def coerce(value, path: [])
+      def coerce(value, path: ErrorPath.root(self))
         if value.is_a?(::Array)
           value.map.with_index do |v, i|
-            @type.coerce(v, path: path+[i])
+            @type.coerce(v, path: path.dig(key: i, type: @type))
           end
         else
-          raise Error.new(path: path, type: self, value: value)
+          raise TypeError.new(path: path, value: value)
         end
       end
 
@@ -134,9 +134,9 @@ class StrongJSON
         @fields = fields
       end
 
-      def coerce(object, path: [])
+      def coerce(object, path: ErrorPath.root(self))
         unless object.is_a?(Hash)
-          raise Error.new(path: path, type: self, value: object)
+          raise TypeError.new(path: path, value: object)
         end
 
         # @type var result: ::Hash<Symbol, any>
@@ -144,14 +144,14 @@ class StrongJSON
 
         object.each do |key, value|
           unless @fields.key?(key)
-            raise UnexpectedFieldError.new(path: path + [key], value: value)
+            raise UnexpectedAttributeError.new(path: path, attribute: key)
           end
         end
 
         @fields.each do |key, type|
           value = object.key?(key) ? object[key] : NONE
 
-          test_value_type(path + [key], type, value) do |v|
+          test_value_type(path.dig(key: key, type: type), type, value) do |v|
             result[key] = v
           end
         end
@@ -188,11 +188,8 @@ class StrongJSON
       end
 
       def to_s
-        # @type var fields: ::Array<String>
-        fields = []
-
-        @fields.each do |name, type|
-          fields << "#{name}: #{type}"
+        fields = @fields.map do |name, type|
+          "#{name}: #{type}"
         end
 
         "object(#{fields.join(', ')})"
@@ -215,66 +212,109 @@ class StrongJSON
         "enum(#{types.map(&:to_s).join(", ")})"
       end
 
-      def coerce(value, path: [])
+      def coerce(value, path: ErrorPath.root(self))
         if d = detector
           type = d[value]
           if type && types.include?(type)
-            return type.coerce(value, path: path)
+            return type.coerce(value, path: path.expand(type: type))
           end
         end
 
         types.each do |ty|
           begin
-            return ty.coerce(value, path: path)
-          rescue UnexpectedFieldError, IllegalTypeError, Error # rubocop:disable Lint/HandleExceptions
+            return ty.coerce(value, path: path.expand(type: ty))
+          rescue UnexpectedAttributeError, IllegalTopTypeError, TypeError # rubocop:disable Lint/HandleExceptions
           end
         end
 
-        raise Error.new(path: path, type: self, value: value)
+        raise TypeError.new(path: path, value: value)
       end
     end
 
-    class UnexpectedFieldError < StandardError
-      # @dynamic path, value
-      attr_reader :path, :value
+    class UnexpectedAttributeError < StandardError
+      # @dynamic path, attribute
+      attr_reader :path, :attribute
 
-      def initialize(path: , value:)
+      def initialize(path:, attribute:)
         @path = path
-        @value = value
+        @attribute = attribute
+        super "UnexpectedAttributeError at #{path.to_s}: attribute=#{attribute}"
       end
 
-      def to_s
-        position = "#{path.join('.')}"
-        "Unexpected field of #{position} (#{value})"
+      def type
+        path.type
       end
     end
 
-    class IllegalTypeError < StandardError
+    class IllegalTopTypeError < StandardError
       # @dynamic type
       attr_reader :type
 
       def initialize(type:)
         @type = type
-      end
-
-      def to_s
-        "#{type} can not be put on toplevel"
+        super "IllegalTopTypeError: type=#{type}"
       end
     end
 
-    class Error < StandardError
-      # @dynamic path, type, value
-      attr_reader :path, :type, :value
+    class TypeError < StandardError
+      # @dynamic path, value
+      attr_reader :path, :value
 
-      def initialize(path:, type:, value:)
+      def initialize(path:, value:)
         @path = path
-        @type = type
         @value = value
+        super "TypeError at #{path.to_s}: expected=#{path.type}, value=#{value.inspect}"
+      end
+
+      def type
+        path.type
+      end
+    end
+
+    class ErrorPath
+      # @dynamic type, parent
+      attr_reader :type, :parent
+
+      def initialize(type:, parent:)
+        @type = type
+        @parent = parent
+      end
+
+      def dig(key:, type:)
+        # @type var parent: [Integer | Symbol | nil, ErrorPath]
+        parent = [key, self]
+        self.class.new(type: type, parent: parent)
+      end
+
+      def expand(type:)
+        # @type var parent: [Integer | Symbol | nil, ErrorPath]
+        parent = [nil, self]
+        self.class.new(type: type, parent: parent)
+      end
+
+      def self.root(type)
+        self.new(type: type, parent: nil)
+      end
+
+      def root?
+        !parent
       end
 
       def to_s
-        position = path.empty? ? "" : " at .#{path.join('.')}"
-        "Expected type of value #{value}#{position} is #{type}"
+        if pa = parent
+          if key = pa[0]
+            pa[1].to_s + case key
+                         when Integer
+                           "[#{key}]"
+                         when Symbol
+                           ".#{key}"
+                         end
+          else
+            pa[1].to_s
+          end
+        else
+          "$"
+        end
       end
     end
   end

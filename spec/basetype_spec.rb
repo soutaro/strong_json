@@ -6,7 +6,7 @@ describe StrongJSON::Type::Base do
       let (:type) { StrongJSON::Type::Base.new(:ignored) }
 
       it "can not be placed on toplevel" do
-        expect { type.coerce(3, path: []) }.to raise_error(StrongJSON::Type::IllegalTypeError)
+        expect { type.coerce(3) }.to raise_error(StrongJSON::Type::IllegalTopTypeError)
       end
     end
 

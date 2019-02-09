@@ -6,8 +6,12 @@ end
 
 StrongJSON::VERSION: String
 
+class StandardError
+  def initialize: (String) -> any
+end
+
 interface StrongJSON::_Schema<'type>
-  def coerce: (any, ?path: ::Array<Symbol>) -> 'type
+  def coerce: (any, ?path: Type::ErrorPath) -> 'type
   def =~: (any) -> bool
   def to_s: -> String
   def is_a?: (any) -> bool

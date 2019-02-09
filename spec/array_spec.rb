@@ -21,19 +21,19 @@ describe StrongJSON::Type::Array, "#coerce" do
   it "reject non array" do
     type = StrongJSON::Type::Array.new(StrongJSON::Type::Base.new(:number))
 
-    expect { type.coerce({}) }.to raise_error(StrongJSON::Type::Error)
+    expect { type.coerce({}) }.to raise_error(StrongJSON::Type::TypeError)
   end
 
   it "reject membership" do
     type = StrongJSON::Type::Array.new(StrongJSON::Type::Base.new(:number))
 
-    expect { type.coerce(["a"]) }.to raise_error(StrongJSON::Type::Error)
+    expect { type.coerce(["a"]) }.to raise_error(StrongJSON::Type::TypeError)
   end
 
   it "rejects nil" do
     type = StrongJSON::Type::Array.new(StrongJSON::Type::Base.new(:number))
 
-    expect { type.coerce(nil) }.to raise_error(StrongJSON::Type::Error)
+    expect { type.coerce(nil) }.to raise_error(StrongJSON::Type::TypeError)
   end
 
   describe "=~" do

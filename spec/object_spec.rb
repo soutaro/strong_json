@@ -12,7 +12,10 @@ describe StrongJSON::Type::Object do
     it "rejects unspecified fields" do
       type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:numeric))
 
-      expect { type.coerce(a:123, b:true) }.to raise_error(StrongJSON::Type::UnexpectedFieldError)
+      expect { type.coerce(a:123, b:true) }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
+        expect(e.path.to_s).to eq("$")
+        expect(e.attribute).to eq(:b)
+      }
     end
 
     describe "ignored" do
@@ -30,7 +33,10 @@ describe StrongJSON::Type::Object do
     it "rejects objects with missing fields" do
       type = StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:numeric))
 
-      expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::UnexpectedFieldError)
+      expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
+        expect(e.path.to_s).to eq("$")
+        expect(e.attribute).to eq(:b)
+      }
     end
   end
 
@@ -63,7 +69,9 @@ describe StrongJSON::Type::Object do
     it "overrides field" do
       ty2 = type.merge(a: StrongJSON::Type::Base.new(:prohibited))
 
-      expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::Error)
+      expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::TypeError) {|e|
+        expect(e.path.to_s).to eq("$.a")
+      }
     end
 
     it "adds field via object" do
@@ -75,7 +83,9 @@ describe StrongJSON::Type::Object do
     it "overrides field via object" do
       ty2 = type.merge(StrongJSON::Type::Object.new(a: StrongJSON::Type::Base.new(:prohibited)))
 
-      expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::Error)
+      expect{ ty2.coerce(a: 123) }.to raise_error(StrongJSON::Type::TypeError) {|e|
+        expect(e.path.to_s).to eq("$.a")
+      }
     end
   end
 

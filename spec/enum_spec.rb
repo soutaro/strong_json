@@ -49,7 +49,7 @@ describe StrongJSON::Type::Enum do
     end
 
     it "raises error" do
-      expect { type.coerce(3.14) }.to raise_error(StrongJSON::Type::Error)
+      expect { type.coerce(3.14) }.to raise_error(StrongJSON::Type::TypeError)
     end
 
     context "with detector" do
@@ -91,8 +91,8 @@ describe StrongJSON::Type::Enum do
 
       it "raises error with base type" do
         expect {
-          type.coerce({ regexp: "foo", option: 3 })
-        }.to raise_error(StrongJSON::Type::Error) {|x|
+          type.coerce({ regexp: "foo", option: 123 })
+        }.to raise_error(StrongJSON::Type::TypeError) {|x|
           expect(x.type).to be_a(StrongJSON::Type::Base)
         }
       end
@@ -100,7 +100,7 @@ describe StrongJSON::Type::Enum do
       it "raises error with enum type" do
         expect {
           type.coerce({ option: 3 })
-        }.to raise_error(StrongJSON::Type::Error) {|x|
+        }.to raise_error(StrongJSON::Type::TypeError) {|x|
           expect(x.type).to eq(type)
         }
       end
