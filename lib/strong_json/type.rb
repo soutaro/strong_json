@@ -1,7 +1,5 @@
 class StrongJSON
   module Type
-    NONE = ::Object.new
-
     module Match
       def =~(value)
         coerce(value)
@@ -27,8 +25,6 @@ class StrongJSON
 
       def test(value)
         case @type
-        when :ignored
-          true
         when :any
           true
         when :number
@@ -48,11 +44,8 @@ class StrongJSON
 
       def coerce(value, path: ErrorPath.root(self))
         raise TypeError.new(value: value, path: path) unless test(value)
-        raise IllegalTopTypeError.new(type: self) if path.root? && @type == :ignored
 
         case type
-        when :ignored
-          NONE
         when :symbol
           value.to_sym
         else
@@ -73,7 +66,7 @@ class StrongJSON
       end
 
       def coerce(value, path: ErrorPath.root(self))
-        unless value == nil || NONE.equal?(value)
+        unless value == nil
           @type.coerce(value, path: path.expand(type: @type))
         else
           nil
@@ -130,8 +123,13 @@ class StrongJSON
     class Object
       include Match
 
-      def initialize(fields)
+      # @dynamic fields, ignored_attributes, prohibited_attributes
+      attr_reader :fields, :ignored_attributes, :prohibited_attributes
+
+      def initialize(fields, ignored_attributes:, prohibited_attributes:)
         @fields = fields
+        @ignored_attributes = ignored_attributes
+        @prohibited_attributes = prohibited_attributes
       end
 
       def coerce(object, path: ErrorPath.root(self))
@@ -139,52 +137,64 @@ class StrongJSON
           raise TypeError.new(path: path, value: object)
         end
 
+        unless (intersection = Set.new(object.keys).intersection(prohibited_attributes)).empty?
+          raise UnexpectedAttributeError.new(path: path, attribute: intersection.to_a.first)
+        end
+
+        case attrs = ignored_attributes
+        when :any
+          object = object.dup
+          extra_keys = Set.new(object.keys) - Set.new(fields.keys)
+          extra_keys.each do |key|
+            object.delete(key)
+          end
+        when Set
+          object = object.dup
+          attrs.each do |key|
+            object.delete(key)
+          end
+        end
+
         # @type var result: ::Hash<Symbol, any>
         result = {}
 
-        object.each do |key, value|
-          unless @fields.key?(key)
+        object.each do |key, _|
+          unless fields.key?(key)
             raise UnexpectedAttributeError.new(path: path, attribute: key)
           end
         end
 
-        @fields.each do |key, type|
-          value = object.key?(key) ? object[key] : NONE
-
-          test_value_type(path.dig(key: key, type: type), type, value) do |v|
-            result[key] = v
-          end
+        fields.each do |key, type|
+          result[key] = type.coerce(object[key], path: path.dig(key: key, type: type))
         end
 
         _ = result
       end
 
-      def test_value_type(path, type, value)
-        v = type.coerce(value, path: path)
-
-        return if NONE.equal?(v) || NONE.equal?(type)
-        return if type.is_a?(Optional) && NONE.equal?(value)
-
-        yield(v)
+      def ignore(attrs)
+        Object.new(fields, ignored_attributes: attrs, prohibited_attributes: prohibited_attributes)
       end
 
-      def merge(fields)
-        # @type var fs: Hash<Symbol, _Schema<any>>
-
-        fs = case fields
-             when Object
-               fields.instance_variable_get(:"@fields")
-             when Hash
-               fields
-             end
-
-        Object.new(@fields.merge(fs))
+      def ignore!(attrs)
+        @ignored_attributes = attrs
+        self
       end
 
-      def except(*keys)
-        Object.new(keys.each.with_object(@fields.dup) do |key, hash|
-                     hash.delete key
-                   end)
+      def prohibit(attrs)
+        Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: attrs)
+      end
+
+      def prohibit!(attrs)
+        @prohibited_attributes = attrs
+        self
+      end
+
+      def update_fields
+        fields.dup.yield_self do |fields|
+          yield fields
+
+          Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: prohibited_attributes)
+        end
       end
 
       def to_s
@@ -223,7 +233,7 @@ class StrongJSON
         types.each do |ty|
           begin
             return ty.coerce(value, path: path.expand(type: ty))
-          rescue UnexpectedAttributeError, IllegalTopTypeError, TypeError # rubocop:disable Lint/HandleExceptions
+          rescue UnexpectedAttributeError, TypeError # rubocop:disable Lint/HandleExceptions
           end
         end
 
@@ -243,16 +253,6 @@ class StrongJSON
 
       def type
         path.type
-      end
-    end
-
-    class IllegalTopTypeError < StandardError
-      # @dynamic type
-      attr_reader :type
-
-      def initialize(type:)
-        @type = type
-        super "IllegalTopTypeError: type=#{type}"
       end
     end
 

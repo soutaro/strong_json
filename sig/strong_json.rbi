@@ -21,8 +21,9 @@ type StrongJSON::ty = _Schema<any>
 
 module StrongJSON::Types
   def object: <'x> (Hash<Symbol, ty>) -> Type::Object<'x>
-            | () -> Type::Object<Hash<Symbol, any>>
+            | () -> Type::Object<{}>
   def object?: <'x> (Hash<Symbol, ty>) -> Type::Optional<'x>
+             | () -> Type::Optional<{}>
   def any: () -> Type::Base<any>
   def optional: <'x> (_Schema<'x>) -> Type::Optional<'x>
               | () -> Type::Optional<any>
@@ -43,6 +44,4 @@ module StrongJSON::Types
   def literal?: <'x> ('x) -> Type::Optional<'x>
   def enum: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Enum<'x>
   def enum?: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Optional<'x>
-  def ignored: () -> _Schema<nil>
-  def prohibited: () -> _Schema<nil>
 end

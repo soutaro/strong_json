@@ -2,7 +2,11 @@ class StrongJSON
   module Types
     # @type method object: (?Hash<Symbol, ty>) -> Type::Object<any>
     def object(fields = {})
-      Type::Object.new(fields)
+      if fields.empty?
+        Type::Object.new(fields, ignored_attributes: nil, prohibited_attributes: Set.new)
+      else
+        Type::Object.new(fields, ignored_attributes: :any, prohibited_attributes: Set.new)
+      end
     end
 
     # @type method array: (?ty) -> Type::Array<any>
@@ -39,10 +43,6 @@ class StrongJSON
       optional(any)
     end
 
-    def prohibited
-      StrongJSON::Type::Base.new(:prohibited)
-    end
-
     def symbol
       StrongJSON::Type::Base.new(:symbol)
     end
@@ -75,15 +75,12 @@ class StrongJSON
       optional(symbol)
     end
 
-    def ignored
-      StrongJSON::Type::Base.new(:ignored)
-    end
-
     def array?(ty)
       optional(array(ty))
     end
 
-    def object?(fields)
+    # @type method object?: (?Hash<Symbol, ty>) -> Type::Optional<any>
+    def object?(fields={})
       optional(object(fields))
     end
 

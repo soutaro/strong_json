@@ -1,14 +1,12 @@
 module StrongJSON::Type
 end
 
-StrongJSON::Type::NONE: any
-
 module StrongJSON::Type::Match: _Schema<any>
   def =~: (any) -> bool
   def ===: (any) -> bool
 end
 
-type StrongJSON::base_type_name = :ignored | :any | :number | :string | :boolean | :numeric | :symbol | :prohibited
+type StrongJSON::base_type_name = :any | :number | :string | :boolean | :numeric | :symbol
 
 class StrongJSON::Type::Base<'a>
   include Match
@@ -50,13 +48,18 @@ end
 class StrongJSON::Type::Object<'t>
   include Match
 
-  @fields: Hash<Symbol, _Schema<'t>>
+  attr_reader fields: Hash<Symbol, _Schema<any>>
+  attr_reader ignored_attributes: :any | Set<Symbol> | nil
+  attr_reader prohibited_attributes: Set<Symbol>
 
-  def initialize: (Hash<Symbol, _Schema<'t>>) -> any
+  def initialize: (Hash<Symbol, _Schema<'t>>, ignored_attributes: :any | Set<Symbol> | nil, prohibited_attributes: Set<Symbol>) -> any
   def coerce: (any, ?path: ErrorPath) -> 't
-  def test_value_type: <'x, 'y> (ErrorPath, _Schema<'x>, any) { ('x) -> 'y } -> 'y
-  def merge: (Object<any> | Hash<Symbol, _Schema<any>>) -> Object<any>
-  def except: (*Symbol) -> Object<any>
+
+  def ignore: (:any | Set<Symbol> | nil) -> self
+  def ignore!: (:any | Set<Symbol> | nil) -> self
+  def prohibit: (Set<Symbol>) -> self
+  def prohibit!: (Set<Symbol>) -> self
+  def update_fields: <'x> { (Hash<Symbol, _Schema<any>>) -> void } -> Object<'x>
 end
 
 type StrongJSON::Type::detector = ^(any) -> _Schema<any>?
@@ -99,7 +102,3 @@ class StrongJSON::Type::UnexpectedAttributeError < StandardError
   def type: -> _Schema<any>
 end
 
-class StrongJSON::Type::IllegalTopTypeError < StandardError
-  attr_reader type: ty
-  def initialize: (type: ty) -> any
-end

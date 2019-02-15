@@ -22,14 +22,28 @@ describe StrongJSON::Type::Enum do
 
   describe "#coerce" do
     let (:type) {
-      StrongJSON::Type::Enum.new([
-                                   StrongJSON::Type::Object.new(id: StrongJSON::Type::Literal.new("id1"),
-                                                                value: StrongJSON::Type::Base.new(:string)),
-                                   StrongJSON::Type::Object.new(id: StrongJSON::Type::Base.new(:string),
-                                                                value: StrongJSON::Type::Base.new(:symbol)),
-                                   StrongJSON::Type::Optional.new(StrongJSON::Type::Literal.new(3)),
-                                   StrongJSON::Type::Literal.new(false),
-                                 ])
+      StrongJSON::Type::Enum.new(
+        [
+          StrongJSON::Type::Object.new(
+            {
+              id: StrongJSON::Type::Literal.new("id1"),
+              value: StrongJSON::Type::Base.new(:string)
+            },
+            ignored_attributes: nil,
+            prohibited_attributes: Set.new
+          ),
+          StrongJSON::Type::Object.new(
+            {
+              id: StrongJSON::Type::Base.new(:string),
+              value: StrongJSON::Type::Base.new(:symbol)
+            },
+            ignored_attributes: nil,
+            prohibited_attributes: Set.new
+          ),
+          StrongJSON::Type::Optional.new(StrongJSON::Type::Literal.new(3)),
+          StrongJSON::Type::Literal.new(false),
+        ]
+      )
     }
 
     it "returns object with string value" do
@@ -55,13 +69,23 @@ describe StrongJSON::Type::Enum do
     context "with detector" do
       let(:regexp_pattern) {
         StrongJSON::Type::Object.new(
-          regexp: StrongJSON::Type::Base.new(:string),
-          option: StrongJSON::Type::Base.new(:string),
-          )
+          {
+            regexp: StrongJSON::Type::Base.new(:string),
+            option: StrongJSON::Type::Base.new(:string),
+          },
+          ignored_attributes: nil,
+          prohibited_attributes: Set.new
+        )
       }
 
       let(:literal_pattern) {
-        StrongJSON::Type::Object.new(literal: StrongJSON::Type::Base.new(:string))
+        StrongJSON::Type::Object.new(
+          {
+            literal: StrongJSON::Type::Base.new(:string)
+          },
+          ignored_attributes: nil,
+          prohibited_attributes: Set.new
+        )
       }
 
       let(:type) {

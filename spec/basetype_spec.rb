@@ -2,14 +2,6 @@ require "strong_json"
 
 describe StrongJSON::Type::Base do
   describe "#test" do
-    context ":ignored" do
-      let (:type) { StrongJSON::Type::Base.new(:ignored) }
-
-      it "can not be placed on toplevel" do
-        expect { type.coerce(3) }.to raise_error(StrongJSON::Type::IllegalTopTypeError)
-      end
-    end
-
     context ":number" do
       let (:type) { StrongJSON::Type::Base.new(:number) }
       
