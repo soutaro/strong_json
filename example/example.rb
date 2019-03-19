@@ -3,7 +3,7 @@ Schema = _ = StrongJSON.new do
 
   let :address, object(address: string, country: symbol?)
   let :email, object(email: string)
-  let :contact, enum(address, email)
+  let :contact, enum?(address, email)
   let :person, object(name: string, contacts: array(contact))
 end
 
