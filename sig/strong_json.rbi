@@ -16,29 +16,29 @@ end
 type StrongJSON::ty = _Schema<any>
 
 module StrongJSON::Types
-  def object: <'x> (Hash<Symbol, ty>) -> _Schema<'x>
-            | () -> _Schema<Hash<Symbol, any>>
-  def object?: <'x> (Hash<Symbol, ty>) -> _Schema<'x | nil>
-  def any: () -> _Schema<any>
-  def optional: <'x> (?_Schema<'x>) -> _Schema<'x | nil>
-              | () -> _Schema<any>
-  def string: () -> _Schema<String>
-  def string?: () -> _Schema<String?>
-  def number: () -> _Schema<Numeric>
-  def number?: () -> _Schema<Numeric?>
-  def numeric: () -> _Schema<Numeric>
-  def numeric?: () -> _Schema<Numeric?>
-  def boolean: () -> _Schema<bool>
-  def boolean?: () -> _Schema<bool?>
-  def symbol: () -> _Schema<Symbol>
-  def symbol?: () -> _Schema<Symbol?>
-  def array: <'x> (_Schema<'x>) -> _Schema<Array<'x>>
-           | () -> _Schema<Array<any>>
-  def array?: <'x> (_Schema<'x>) -> _Schema<Array<'x>?>
-  def literal: <'x> ('x) -> _Schema<'x>
-  def literal?: <'x> ('x) -> _Schema<'x?>
-  def enum: <'x> (*_Schema<any>) -> _Schema<'x>
-  def enum?: <'x> (*_Schema<any>) -> _Schema<'x?>
+  def object: <'x> (Hash<Symbol, ty>) -> Type::Object<'x>
+            | () -> Type::Object<Hash<Symbol, any>>
+  def object?: <'x> (Hash<Symbol, ty>) -> Type::Optional<'x>
+  def any: () -> Type::Base<any>
+  def optional: <'x> (_Schema<'x>) -> Type::Optional<'x>
+              | () -> Type::Optional<any>
+  def string: () -> Type::Base<String>
+  def string?: () -> Type::Optional<String>
+  def number: () -> Type::Base<Numeric>
+  def number?: () -> Type::Optional<Numeric>
+  def numeric: () -> Type::Base<Numeric>
+  def numeric?: () -> Type::Optional<Numeric>
+  def boolean: () -> Type::Base<bool>
+  def boolean?: () -> Type::Optional<bool>
+  def symbol: () -> Type::Base<Symbol>
+  def symbol?: () -> Type::Optional<Symbol>
+  def array: <'x> (_Schema<'x>) -> Type::Array<'x>
+           | () -> Type::Array<any>
+  def array?: <'x> (_Schema<'x>) -> Type::Optional<::Array<'x>>
+  def literal: <'x> ('x) -> Type::Literal<'x>
+  def literal?: <'x> ('x) -> Type::Optional<'x>
+  def enum: <'x> (*_Schema<any>) -> Type::Enum<'x>
+  def enum?: <'x> (*_Schema<any>) -> Type::Optional<'x>
   def ignored: () -> _Schema<nil>
   def prohibited: () -> _Schema<nil>
 end
