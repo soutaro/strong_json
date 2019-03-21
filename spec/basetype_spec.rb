@@ -170,4 +170,20 @@ describe StrongJSON::Type::Base do
       end
     end
   end
+
+  describe "alias" do
+    let (:type) { StrongJSON::Type::Base.new(:number) }
+
+    it "returns nil" do
+      expect(type.alias).to be_nil
+    end
+
+    describe "with_alias" do
+      let (:aliased_type) { type.with_alias(:count) }
+
+      it "returns alias name" do
+        expect(aliased_type.alias).to eq(:count)
+      end
+    end
+  end
 end

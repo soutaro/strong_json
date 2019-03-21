@@ -28,4 +28,16 @@ describe "StrongJSON.new" do
       expect(e.path.to_s).to eq("$.e2")
     }
   end
+
+  describe "#let" do
+    it "defines aliased type" do
+      s = StrongJSON.new do
+        let :count, number
+        let :age, number
+      end
+
+      expect(s.count.alias).to eq(:count)
+      expect(s.age.alias).to eq(:age)
+    end
+  end
 end

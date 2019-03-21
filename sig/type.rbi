@@ -6,10 +6,17 @@ module StrongJSON::Type::Match: _Schema<any>
   def ===: (any) -> bool
 end
 
+module StrongJSON::Type::WithAlias: ::Object
+  @alias: Symbol?
+  def alias: -> Symbol?
+  def with_alias: (Symbol) -> self
+end
+
 type StrongJSON::base_type_name = :any | :number | :string | :boolean | :numeric | :symbol
 
 class StrongJSON::Type::Base<'a>
   include Match
+  include WithAlias
 
   attr_reader type: base_type_name
 
@@ -20,6 +27,7 @@ end
 
 class StrongJSON::Type::Optional<'t>
   include Match
+  include WithAlias
 
   @type: _Schema<'t>
 
@@ -29,6 +37,7 @@ end
 
 class StrongJSON::Type::Literal<'t>
   include Match
+  include WithAlias
 
   attr_reader value: 't
 
@@ -38,6 +47,7 @@ end
 
 class StrongJSON::Type::Array<'t>
   include Match
+  include WithAlias
 
   @type: _Schema<'t>
 
@@ -47,6 +57,7 @@ end
 
 class StrongJSON::Type::Object<'t>
   include Match
+  include WithAlias
 
   attr_reader fields: Hash<Symbol, _Schema<any>>
   attr_reader ignored_attributes: :any | Set<Symbol> | nil
@@ -66,6 +77,7 @@ type StrongJSON::Type::detector = ^(any) -> _Schema<any>?
 
 class StrongJSON::Type::Enum<'t>
   include Match
+  include WithAlias
 
   attr_reader types: ::Array<_Schema<any>>
   attr_reader detector: detector?

@@ -13,8 +13,23 @@ class StrongJSON
       end
     end
 
+    module WithAlias
+      def alias
+        @alias
+      end
+
+      def with_alias(name)
+        _ = dup.tap do |copy|
+          copy.instance_eval do
+            @alias = name
+          end
+        end
+      end
+    end
+
     class Base
       include Match
+      include WithAlias
 
       # @dynamic type
       attr_reader :type
@@ -60,6 +75,7 @@ class StrongJSON
 
     class Optional
       include Match
+      include WithAlias
 
       def initialize(type)
         @type = type
@@ -80,6 +96,7 @@ class StrongJSON
 
     class Literal
       include Match
+      include WithAlias
 
       # @dynamic value
       attr_reader :value
@@ -100,6 +117,7 @@ class StrongJSON
 
     class Array
       include Match
+      include WithAlias
 
       def initialize(type)
         @type = type
@@ -122,6 +140,7 @@ class StrongJSON
 
     class Object
       include Match
+      include WithAlias
 
       # @dynamic fields, ignored_attributes, prohibited_attributes
       attr_reader :fields, :ignored_attributes, :prohibited_attributes
@@ -208,6 +227,7 @@ class StrongJSON
 
     class Enum
       include Match
+      include WithAlias
 
       # @dynamic types, detector
       attr_reader :types

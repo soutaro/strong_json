@@ -15,6 +15,8 @@ interface StrongJSON::_Schema<'type>
   def =~: (any) -> bool
   def to_s: -> String
   def is_a?: (any) -> bool
+  def alias: -> Symbol?
+  def with_alias: (Symbol) -> self
 end
 
 type StrongJSON::ty = _Schema<any>
