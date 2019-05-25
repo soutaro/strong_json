@@ -1,6 +1,8 @@
 require "strong_json/version"
 require "strong_json/type"
 require "strong_json/types"
+require "strong_json/error_reporter"
+require "prettyprint"
 
 class StrongJSON
   def initialize(&block)

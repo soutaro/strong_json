@@ -71,11 +71,25 @@ class StrongJSON
       def to_s
         @type.to_s
       end
+
+      def ==(other)
+        if other.is_a?(Base)
+          # @type var other: Base<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
+      end
     end
 
     class Optional
       include Match
       include WithAlias
+
+      # @dynamic type
+      attr_reader :type
 
       def initialize(type)
         @type = type
@@ -92,6 +106,17 @@ class StrongJSON
       def to_s
         "optional(#{@type})"
       end
+
+      def ==(other)
+        if other.is_a?(Optional)
+          # @type var other: Optional<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
+      end
     end
 
     class Literal
@@ -106,18 +131,32 @@ class StrongJSON
       end
 
       def to_s
-        "literal(#{@value})"
+        (_ = @value).inspect
       end
 
       def coerce(value, path: ErrorPath.root(self))
         raise TypeError.new(path: path, value: value) unless (_ = self.value) == value
         value
       end
+
+      def ==(other)
+        if other.is_a?(Literal)
+          # @type var other: Literal<any>
+          other.value == value
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
+      end
     end
 
     class Array
       include Match
       include WithAlias
+
+      # @dynamic type
+      attr_reader :type
 
       def initialize(type)
         @type = type
@@ -135,6 +174,17 @@ class StrongJSON
 
       def to_s
         "array(#{@type})"
+      end
+
+      def ==(other)
+        if other.is_a?(Array)
+          # @type var other: Array<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
@@ -223,6 +273,19 @@ class StrongJSON
 
         "object(#{fields.join(', ')})"
       end
+
+      def ==(other)
+        if other.is_a?(Object)
+          # @type var other: Object<any>
+          other.fields == fields &&
+            other.ignored_attributes == ignored_attributes &&
+            other.prohibited_attributes == prohibited_attributes
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
+      end
     end
 
     class Enum
@@ -259,6 +322,18 @@ class StrongJSON
 
         raise TypeError.new(path: path, value: value)
       end
+
+      def ==(other)
+        if other.is_a?(Enum)
+          # @type var other: Enum<any>
+          other.types == types &&
+            other.detector == detector
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
+      end
     end
 
     class UnexpectedAttributeError < StandardError
@@ -283,7 +358,9 @@ class StrongJSON
       def initialize(path:, value:)
         @path = path
         @value = value
-        super "TypeError at #{path.to_s}: expected=#{path.type}, value=#{value.inspect}"
+        type = path.type
+        s = type.alias || type
+        super "TypeError at #{path.to_s}: expected=#{s}, value=#{value.inspect}"
       end
 
       def type

@@ -17,6 +17,8 @@ interface StrongJSON::_Schema<'type>
   def is_a?: (any) -> bool
   def alias: -> Symbol?
   def with_alias: (Symbol) -> self
+  def ==: (any) -> bool
+  def yield_self: <'a> () { (self) -> 'a } -> 'a
 end
 
 type StrongJSON::ty = _Schema<any>
@@ -46,4 +48,15 @@ module StrongJSON::Types
   def literal?: <'x> ('x) -> Type::Optional<'x>
   def enum: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Enum<'x>
   def enum?: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Optional<'x>
+end
+
+class StrongJSON::ErrorReporter
+  attr_reader path: Type::ErrorPath
+  @string: String
+  def initialize: (path: Type::ErrorPath) -> any
+  def format: -> void
+  def (private) format_trace: (path: Type::ErrorPath, ?index: Integer) -> void
+  def (private) format_aliases: (path: Type::ErrorPath, where: ::Array<String>) -> ::Array<String>
+  def (private) pretty: (ty, any, ?expand_alias: bool) -> void
+  def pretty_str: (ty, ?expand_alias: bool) -> ::String
 end

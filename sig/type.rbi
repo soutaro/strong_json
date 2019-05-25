@@ -29,7 +29,7 @@ class StrongJSON::Type::Optional<'t>
   include Match
   include WithAlias
 
-  @type: _Schema<'t>
+  attr_reader type: _Schema<'t>
 
   def initialize: (_Schema<'t>) -> any
   def coerce: (any, ?path: ErrorPath) -> ('t | nil)
@@ -49,7 +49,7 @@ class StrongJSON::Type::Array<'t>
   include Match
   include WithAlias
 
-  @type: _Schema<'t>
+  attr_reader type: _Schema<'t>
 
   def initialize: (_Schema<'t>) -> any
   def coerce: (any, ?path: ErrorPath) -> ::Array<'t>
