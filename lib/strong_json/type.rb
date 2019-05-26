@@ -69,7 +69,7 @@ class StrongJSON
       end
 
       def to_s
-        @type.to_s
+        self.alias&.to_s || @type.to_s
       end
 
       def ==(other)
@@ -104,7 +104,7 @@ class StrongJSON
       end
 
       def to_s
-        "optional(#{@type})"
+        self.alias&.to_s || "optional(#{@type})"
       end
 
       def ==(other)
@@ -131,7 +131,7 @@ class StrongJSON
       end
 
       def to_s
-        (_ = @value).inspect
+        self.alias&.to_s || (_ = @value).inspect
       end
 
       def coerce(value, path: ErrorPath.root(self))
@@ -173,7 +173,7 @@ class StrongJSON
       end
 
       def to_s
-        "array(#{@type})"
+        self.alias&.to_s || "array(#{@type})"
       end
 
       def ==(other)
@@ -271,7 +271,7 @@ class StrongJSON
           "#{name}: #{type}"
         end
 
-        "object(#{fields.join(', ')})"
+        self.alias&.to_s || "object(#{fields.join(', ')})"
       end
 
       def ==(other)
@@ -302,7 +302,7 @@ class StrongJSON
       end
 
       def to_s
-        "enum(#{types.map(&:to_s).join(", ")})"
+        self.alias&.to_s || "enum(#{types.map(&:to_s).join(", ")})"
       end
 
       def coerce(value, path: ErrorPath.root(self))
