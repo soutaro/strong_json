@@ -29,6 +29,7 @@ module StrongJSON::Types
   def object?: <'x> (Hash<Symbol, ty>) -> Type::Optional<'x>
              | () -> Type::Optional<{}>
   def any: () -> Type::Base<any>
+  def any?: () -> Type::Optional<any>
   def optional: <'x> (_Schema<'x>) -> Type::Optional<'x>
               | () -> Type::Optional<any>
   def string: () -> Type::Base<String>

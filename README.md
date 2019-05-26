@@ -57,25 +57,29 @@ If an attribute has a value which does not match with given type, the `coerce` m
 * Fields, `f1`, `f2`, and ..., must be present and its values must be of `type1`, `type2`, ..., respectively
 * Objects with other fields will be rejected
 
-#### Performance hint
+#### Ignoring unknown attributes
 
-Object attributes test is done in order of the keys.
+`Object` type ignores unknown attributes by default.
+You can reject the unknown attributes.
 
-```ruby
-slower_object = enum(
-  object(id: numeric, created_at: string, updated_at: string, type: literal("person"), name: string),
-  object(id: numeric, created_at: string, updated_at: string, type: literal("food"), object: any)
-)
-
-faster_object = enum(
-  object(type: literal("person"), id: numeric, created_at: string, updated_at: string, name: string),
-  object(type: literal("food"), id: numeric, created_at: string, updated_at: string, object: any)
-)
+```
+object(attrs).ignore(Set.new)       # Ignores nothing (== raise an error)
+object(attrs).ignore!(Set.new)      # Destructive version
 ```
 
-The two enums represents same object, but testing runs faster with `faster_object`.
-Objects in `faster_object` have `type` attribute as their first keys.
-Testing `type` is done first, and it soon determines if the object is `"person"` or `"food"`.
+You can selectively ignore attributes:
+
+```
+object(attrs).ignore(Set.new([:a, :b, :c]))   # Ignores only :a, :b, and :c
+object(attrs).ignore(:any)                    # Ignores everything (default)
+```
+
+`Object` also has `prohibit` method to specify attributes to make the type check failed.
+
+```
+object(attrs).prohibit(Set.new([:created_at, :updated_at]))   # Make type check failed if :created_at or :updated_at included
+object(attrs).prohibit!(Set.new([:created_at, :updated_at]))  # Destructive version
+```
 
 ### array(type)
 
@@ -92,6 +96,25 @@ Testing `type` is done first, and it soon determines if the object is `"person"`
 * The value can be one of the given types
 * First successfully coerced value will return
 
+#### `detector` keyword
+
+`enum` has optional keyword argument `detector`, which helps identify the type of value.
+
+```rb
+enum(person,
+     contact,
+     detector: -> (value) {
+       if value.is_a?(Hash)
+         case
+         when value[:type] == "person"
+           person
+         when value[:type] == "contact"
+           contact
+         end
+       end
+     })
+```
+
 ### Base types
 
 * `number` The value must be an instance of `Numeric`
@@ -99,7 +122,6 @@ Testing `type` is done first, and it soon determines if the object is `"person"`
 * `boolean` The value must be `true` or `false`
 * `numeric` The value must be an instance of `Numeric` or a string which represents a number
 * `any` Any value except `nil` is accepted
-* `ignored` Any value will be ignored
 * `symbol` The value must be an instance of `String` or `Symbol`; returns the result ot `#to_sym`
 
 ### Literals
@@ -116,13 +138,43 @@ There are some alias for `optional(base)`, where base is base types, as the foll
 * `numeric?`
 * `symbol?`
 * `literal?(lit)`
-* `any?`
 
 Shortcuts for complex data are also defined as the following:
 
 * `optional(array(ty))` → `array?(ty)`
 * `optional(object(fields))` → `object?(fields)`
 * `optional(enum(types))` → `enum?(types)`
+
+## ErrorReporter
+
+You can pretty print type error using `ErrorReporter`.
+
+```rb
+begin
+  type_check()
+rescue StrongJSON::TypeError, StrongJSON::UnexpectedAttributeError => exn
+  puts exn.message
+  puts StrongJSON::ErrorReporter.new(path: exn.path).to_s
+end
+```
+
+It will print a _user-friendly_ error message like:
+
+```
+TypeError at $.pattern: expected=pattern, value={:pattern=>3}
+ "pattern" expected to be pattern
+  $ expected to be rule
+
+Where:
+  pattern = enum(
+    regexp_pattern,
+    token_pattern,
+    literal_pattern,
+    string_pattern,
+    optional(string)
+  )
+  rule = { "pattern": pattern, "glob": optional(enum(string, array(string))) }
+```
 
 ## Type checking
 
