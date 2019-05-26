@@ -1,7 +1,5 @@
 class StrongJSON
   module Type
-    NONE = ::Object.new
-
     module Match
       def =~(value)
         coerce(value)
@@ -15,8 +13,23 @@ class StrongJSON
       end
     end
 
+    module WithAlias
+      def alias
+        @alias
+      end
+
+      def with_alias(name)
+        _ = dup.tap do |copy|
+          copy.instance_eval do
+            @alias = name
+          end
+        end
+      end
+    end
+
     class Base
       include Match
+      include WithAlias
 
       # @dynamic type
       attr_reader :type
@@ -27,8 +40,6 @@ class StrongJSON
 
       def test(value)
         case @type
-        when :ignored
-          true
         when :any
           true
         when :number
@@ -46,13 +57,10 @@ class StrongJSON
         end
       end
 
-      def coerce(value, path: [])
-        raise Error.new(value: value, type: self, path: path) unless test(value)
-        raise IllegalTypeError.new(type: self) if path == [] && @type == :ignored
+      def coerce(value, path: ErrorPath.root(self))
+        raise TypeError.new(value: value, path: path) unless test(value)
 
         case type
-        when :ignored
-          NONE
         when :symbol
           value.to_sym
         else
@@ -61,32 +69,59 @@ class StrongJSON
       end
 
       def to_s
-        @type.to_s
+        self.alias&.to_s || @type.to_s
+      end
+
+      def ==(other)
+        if other.is_a?(Base)
+          # @type var other: Base<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
     class Optional
       include Match
+      include WithAlias
+
+      # @dynamic type
+      attr_reader :type
 
       def initialize(type)
         @type = type
       end
 
-      def coerce(value, path: [])
-        unless value == nil || NONE.equal?(value)
-          @type.coerce(value, path: path)
+      def coerce(value, path: ErrorPath.root(self))
+        unless value == nil
+          @type.coerce(value, path: path.expand(type: @type))
         else
           nil
         end
       end
 
       def to_s
-        "optional(#{@type})"
+        self.alias&.to_s || "optional(#{@type})"
+      end
+
+      def ==(other)
+        if other.is_a?(Optional)
+          # @type var other: Optional<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
     class Literal
       include Match
+      include WithAlias
 
       # @dynamic value
       attr_reader :value
@@ -96,176 +131,287 @@ class StrongJSON
       end
 
       def to_s
-        "literal(#{@value})"
+        self.alias&.to_s || (_ = @value).inspect
       end
 
-      def coerce(value, path: [])
-        raise Error.new(path: path, type: self, value: value) unless (_ = self.value) == value
+      def coerce(value, path: ErrorPath.root(self))
+        raise TypeError.new(path: path, value: value) unless (_ = self.value) == value
         value
+      end
+
+      def ==(other)
+        if other.is_a?(Literal)
+          # @type var other: Literal<any>
+          other.value == value
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
     class Array
       include Match
+      include WithAlias
+
+      # @dynamic type
+      attr_reader :type
 
       def initialize(type)
         @type = type
       end
 
-      def coerce(value, path: [])
+      def coerce(value, path: ErrorPath.root(self))
         if value.is_a?(::Array)
           value.map.with_index do |v, i|
-            @type.coerce(v, path: path+[i])
+            @type.coerce(v, path: path.dig(key: i, type: @type))
           end
         else
-          raise Error.new(path: path, type: self, value: value)
+          raise TypeError.new(path: path, value: value)
         end
       end
 
       def to_s
-        "array(#{@type})"
+        self.alias&.to_s || "array(#{@type})"
+      end
+
+      def ==(other)
+        if other.is_a?(Array)
+          # @type var other: Array<any>
+          other.type == type
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
     class Object
       include Match
+      include WithAlias
 
-      def initialize(fields)
+      # @dynamic fields, ignored_attributes, prohibited_attributes
+      attr_reader :fields, :ignored_attributes, :prohibited_attributes
+
+      def initialize(fields, ignored_attributes:, prohibited_attributes:)
         @fields = fields
+        @ignored_attributes = ignored_attributes
+        @prohibited_attributes = prohibited_attributes
       end
 
-      def coerce(object, path: [])
+      def coerce(object, path: ErrorPath.root(self))
         unless object.is_a?(Hash)
-          raise Error.new(path: path, type: self, value: object)
+          raise TypeError.new(path: path, value: object)
+        end
+
+        unless (intersection = Set.new(object.keys).intersection(prohibited_attributes)).empty?
+          raise UnexpectedAttributeError.new(path: path, attribute: intersection.to_a.first)
+        end
+
+        case attrs = ignored_attributes
+        when :any
+          object = object.dup
+          extra_keys = Set.new(object.keys) - Set.new(fields.keys)
+          extra_keys.each do |key|
+            object.delete(key)
+          end
+        when Set
+          object = object.dup
+          attrs.each do |key|
+            object.delete(key)
+          end
         end
 
         # @type var result: ::Hash<Symbol, any>
         result = {}
 
-        object.each do |key, value|
-          unless @fields.key?(key)
-            raise UnexpectedFieldError.new(path: path + [key], value: value)
+        object.each do |key, _|
+          unless fields.key?(key)
+            raise UnexpectedAttributeError.new(path: path, attribute: key)
           end
         end
 
-        @fields.each do |key, type|
-          value = object.key?(key) ? object[key] : NONE
-
-          test_value_type(path + [key], type, value) do |v|
-            result[key] = v
-          end
+        fields.each do |key, type|
+          result[key] = type.coerce(object[key], path: path.dig(key: key, type: type))
         end
 
         _ = result
       end
 
-      def test_value_type(path, type, value)
-        v = type.coerce(value, path: path)
-
-        return if NONE.equal?(v) || NONE.equal?(type)
-        return if type.is_a?(Optional) && NONE.equal?(value)
-
-        yield(v)
+      def ignore(attrs)
+        Object.new(fields, ignored_attributes: attrs, prohibited_attributes: prohibited_attributes)
       end
 
-      def merge(fields)
-        # @type var fs: Hash<Symbol, _Schema<any>>
-
-        fs = case fields
-             when Object
-               fields.instance_variable_get(:"@fields")
-             when Hash
-               fields
-             end
-
-        Object.new(@fields.merge(fs))
+      def ignore!(attrs)
+        @ignored_attributes = attrs
+        self
       end
 
-      def except(*keys)
-        Object.new(keys.each.with_object(@fields.dup) do |key, hash|
-                     hash.delete key
-                   end)
+      def prohibit(attrs)
+        Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: attrs)
+      end
+
+      def prohibit!(attrs)
+        @prohibited_attributes = attrs
+        self
+      end
+
+      def update_fields
+        fields.dup.yield_self do |fields|
+          yield fields
+
+          Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: prohibited_attributes)
+        end
       end
 
       def to_s
-        # @type var fields: ::Array<String>
-        fields = []
-
-        @fields.each do |name, type|
-          fields << "#{name}: #{type}"
+        fields = @fields.map do |name, type|
+          "#{name}: #{type}"
         end
 
-        "object(#{fields.join(', ')})"
+        self.alias&.to_s || "object(#{fields.join(', ')})"
+      end
+
+      def ==(other)
+        if other.is_a?(Object)
+          # @type var other: Object<any>
+          other.fields == fields &&
+            other.ignored_attributes == ignored_attributes &&
+            other.prohibited_attributes == prohibited_attributes
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
     class Enum
       include Match
+      include WithAlias
 
-      # @dynamic types
+      # @dynamic types, detector
       attr_reader :types
+      attr_reader :detector
 
-      def initialize(types)
+      def initialize(types, detector = nil)
         @types = types
+        @detector = detector
       end
 
       def to_s
-        "enum(#{types.map(&:to_s).join(", ")})"
+        self.alias&.to_s || "enum(#{types.map(&:to_s).join(", ")})"
       end
 
-      def coerce(value, path: [])
-        types.each do |ty|
-          begin
-            return ty.coerce(value, path: path)
-          rescue UnexpectedFieldError, IllegalTypeError, Error # rubocop:disable Lint/HandleExceptions
+      def coerce(value, path: ErrorPath.root(self))
+        if d = detector
+          type = d[value]
+          if type && types.include?(type)
+            return type.coerce(value, path: path.expand(type: type))
           end
         end
 
-        raise Error.new(path: path, type: self, value: value)
+        types.each do |ty|
+          begin
+            return ty.coerce(value, path: path.expand(type: ty))
+          rescue UnexpectedAttributeError, TypeError # rubocop:disable Lint/HandleExceptions
+          end
+        end
+
+        raise TypeError.new(path: path, value: value)
+      end
+
+      def ==(other)
+        if other.is_a?(Enum)
+          # @type var other: Enum<any>
+          other.types == types &&
+            other.detector == detector
+        end
+      end
+
+      __skip__ = begin
+        alias eql? ==
       end
     end
 
-    class UnexpectedFieldError < StandardError
+    class UnexpectedAttributeError < StandardError
+      # @dynamic path, attribute
+      attr_reader :path, :attribute
+
+      def initialize(path:, attribute:)
+        @path = path
+        @attribute = attribute
+        super "UnexpectedAttributeError at #{path.to_s}: attribute=#{attribute}"
+      end
+
+      def type
+        path.type
+      end
+    end
+
+    class TypeError < StandardError
       # @dynamic path, value
       attr_reader :path, :value
 
-      def initialize(path: , value:)
+      def initialize(path:, value:)
         @path = path
         @value = value
+        type = path.type
+        s = type.alias || type
+        super "TypeError at #{path.to_s}: expected=#{s}, value=#{value.inspect}"
       end
 
-      def to_s
-        position = "#{path.join('.')}"
-        "Unexpected field of #{position} (#{value})"
+      def type
+        path.type
       end
     end
 
-    class IllegalTypeError < StandardError
-      # @dynamic type
-      attr_reader :type
+    class ErrorPath
+      # @dynamic type, parent
+      attr_reader :type, :parent
 
-      def initialize(type:)
+      def initialize(type:, parent:)
         @type = type
+        @parent = parent
+      end
+
+      def dig(key:, type:)
+        # @type var parent: [Integer | Symbol | nil, ErrorPath]
+        parent = [key, self]
+        self.class.new(type: type, parent: parent)
+      end
+
+      def expand(type:)
+        # @type var parent: [Integer | Symbol | nil, ErrorPath]
+        parent = [nil, self]
+        self.class.new(type: type, parent: parent)
+      end
+
+      def self.root(type)
+        self.new(type: type, parent: nil)
+      end
+
+      def root?
+        !parent
       end
 
       def to_s
-        "#{type} can not be put on toplevel"
-      end
-    end
-
-    class Error < StandardError
-      # @dynamic path, type, value
-      attr_reader :path, :type, :value
-
-      def initialize(path:, type:, value:)
-        @path = path
-        @type = type
-        @value = value
-      end
-
-      def to_s
-        position = path.empty? ? "" : " at .#{path.join('.')}"
-        "Expected type of value #{value}#{position} is #{type}"
+        if pa = parent
+          if key = pa[0]
+            pa[1].to_s + case key
+                         when Integer
+                           "[#{key}]"
+                         when Symbol
+                           ".#{key}"
+                         end
+          else
+            pa[1].to_s
+          end
+        else
+          "$"
+        end
       end
     end
   end

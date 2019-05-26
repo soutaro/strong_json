@@ -2,14 +2,6 @@ require "strong_json"
 
 describe StrongJSON::Type::Base do
   describe "#test" do
-    context ":ignored" do
-      let (:type) { StrongJSON::Type::Base.new(:ignored) }
-
-      it "can not be placed on toplevel" do
-        expect { type.coerce(3, path: []) }.to raise_error(StrongJSON::Type::IllegalTypeError)
-      end
-    end
-
     context ":number" do
       let (:type) { StrongJSON::Type::Base.new(:number) }
       
@@ -175,6 +167,22 @@ describe StrongJSON::Type::Base do
         it "returns symbol" do
           expect(type.coerce("foo")).to eq(:foo)
         end
+      end
+    end
+  end
+
+  describe "alias" do
+    let (:type) { StrongJSON::Type::Base.new(:number) }
+
+    it "returns nil" do
+      expect(type.alias).to be_nil
+    end
+
+    describe "with_alias" do
+      let (:aliased_type) { type.with_alias(:count) }
+
+      it "returns alias name" do
+        expect(aliased_type.alias).to eq(:count)
       end
     end
   end

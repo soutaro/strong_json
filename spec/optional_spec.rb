@@ -13,7 +13,10 @@ describe StrongJSON::Type::Optional, "#coerce" do
     end
 
     it "rejects string" do
-      expect { type.coerce("a") }.to raise_error(StrongJSON::Type::Error)
+      expect { type.coerce("a") }.to raise_error(StrongJSON::Type::TypeError) {|e|
+        expect(e.path.to_s).to eq("$")
+        expect(e.type).to be_a(StrongJSON::Type::Base)
+      }
     end
   end
 end

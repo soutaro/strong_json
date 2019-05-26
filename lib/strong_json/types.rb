@@ -2,7 +2,11 @@ class StrongJSON
   module Types
     # @type method object: (?Hash<Symbol, ty>) -> Type::Object<any>
     def object(fields = {})
-      Type::Object.new(fields)
+      if fields.empty?
+        Type::Object.new(fields, ignored_attributes: nil, prohibited_attributes: Set.new)
+      else
+        Type::Object.new(fields, ignored_attributes: :any, prohibited_attributes: Set.new)
+      end
     end
 
     # @type method array: (?ty) -> Type::Array<any>
@@ -39,10 +43,6 @@ class StrongJSON
       optional(any)
     end
 
-    def prohibited
-      StrongJSON::Type::Base.new(:prohibited)
-    end
-
     def symbol
       StrongJSON::Type::Base.new(:symbol)
     end
@@ -51,8 +51,8 @@ class StrongJSON
       StrongJSON::Type::Literal.new(value)
     end
 
-    def enum(*types)
-      StrongJSON::Type::Enum.new(types)
+    def enum(*types, detector: nil)
+      StrongJSON::Type::Enum.new(types, detector)
     end
 
     def string?
@@ -75,15 +75,12 @@ class StrongJSON
       optional(symbol)
     end
 
-    def ignored
-      StrongJSON::Type::Base.new(:ignored)
-    end
-
     def array?(ty)
       optional(array(ty))
     end
 
-    def object?(fields)
+    # @type method object?: (?Hash<Symbol, ty>) -> Type::Optional<any>
+    def object?(fields={})
       optional(object(fields))
     end
 
@@ -91,8 +88,8 @@ class StrongJSON
       optional(literal(value))
     end
 
-    def enum?(*types)
-      optional(enum(*types))
+    def enum?(*types, detector: nil)
+      optional(enum(*types, detector: detector))
     end
   end
 end
