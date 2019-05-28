@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.0.1 (2019-05-29)
+
+* Improve enum error reporting
+
 ## 1.0.0 (2019-05-26)
 
 * [#14](https://github.com/soutaro/strong_json/pull/14): Revise error reporting
