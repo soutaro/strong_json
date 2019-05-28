@@ -58,6 +58,7 @@ class StrongJSON::ErrorReporter
   def format: -> void
   def (private) format_trace: (path: Type::ErrorPath, ?index: Integer) -> void
   def (private) format_aliases: (path: Type::ErrorPath, where: ::Array<String>) -> ::Array<String>
+  def (private) format_single_alias: (Symbol, ty) -> String
   def (private) pretty: (ty, any, ?expand_alias: bool) -> void
   def pretty_str: (ty, ?expand_alias: bool) -> ::String
 end

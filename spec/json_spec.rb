@@ -145,6 +145,14 @@ Where:
     optional(string)
   )
   rule = { "pattern": pattern, "glob": optional(enum(string, array(string))) }
+  regexp_pattern = {
+    "pattern": string,
+    "multiline": optional(boolean),
+    "case_sensitive": optional(boolean)
+  }
+  token_pattern = { "token": string, "case_sensitive": optional(boolean) }
+  literal_pattern = { "literal": string }
+  string_pattern = string
 MSG
     }
   end
