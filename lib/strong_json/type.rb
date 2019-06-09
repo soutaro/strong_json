@@ -202,7 +202,7 @@ class StrongJSON
       end
 
       def coerce(object, path: ErrorPath.root(self))
-        unless object.is_a?(Hash)
+        unless object.is_a?(::Hash)
           raise TypeError.new(path: path, value: object)
         end
 
@@ -333,6 +333,37 @@ class StrongJSON
 
       __skip__ = begin
         alias eql? ==
+      end
+    end
+
+    class Hash
+      include Match
+      include WithAlias
+
+      # @dynamic type
+      attr_reader :type
+
+      def initialize(type)
+        @type = type
+      end
+
+      def coerce(value, path: ErrorPath.root(self))
+        if value.is_a?(::Hash)
+          (_ = {}).tap do |result|
+            value.each do |k, v|
+              result[k] = type.coerce(v, path: path.dig(key: k, type: type))
+            end
+          end
+        else
+          raise TypeError.new(path: path, value: value)
+        end
+      end
+
+      def ==(other)
+        if other.is_a?(Hash)
+          # @type var other: Hash<any>
+          other.type == type
+        end
       end
     end
 

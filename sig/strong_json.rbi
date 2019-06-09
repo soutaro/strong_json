@@ -49,6 +49,8 @@ module StrongJSON::Types
   def literal?: <'x> ('x) -> Type::Optional<'x>
   def enum: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Enum<'x>
   def enum?: <'x> (*_Schema<any>, ?detector: Type::detector?) -> Type::Optional<'x>
+  def (incompatible) hash: <'x> (_Schema<'x>) -> Type::Hash<'x>
+  def hash?: <'x> (_Schema<'x>) -> Type::Optional<Hash<Symbol, 'x>>
 end
 
 class StrongJSON::ErrorReporter
