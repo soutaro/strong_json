@@ -2,6 +2,10 @@
 
 ## master
 
+## 1.1.0 (2019-06-09)
+
+* [#15](https://github.com/soutaro/strong_json/pull/15): Add `hash` type
+
 ## 1.0.1 (2019-05-29)
 
 * Improve enum error reporting

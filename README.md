@@ -86,6 +86,11 @@ object(attrs).prohibit!(Set.new([:created_at, :updated_at]))  # Destructive vers
 * The value must be an array
 * All elements in the array must be value of given `type`
 
+### hash(type)
+
+* The value must be an object
+* All values in the object must be value of given `type`
+
 ### optional(type)
 
 * The value can be `nil` (or not contained in an object)
