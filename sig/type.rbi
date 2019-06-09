@@ -59,18 +59,18 @@ class StrongJSON::Type::Object<'t>
   include Match
   include WithAlias
 
-  attr_reader fields: Hash<Symbol, _Schema<any>>
+  attr_reader fields: ::Hash<Symbol, _Schema<any>>
   attr_reader ignored_attributes: :any | Set<Symbol> | nil
   attr_reader prohibited_attributes: Set<Symbol>
 
-  def initialize: (Hash<Symbol, _Schema<'t>>, ignored_attributes: :any | Set<Symbol> | nil, prohibited_attributes: Set<Symbol>) -> any
+  def initialize: (::Hash<Symbol, _Schema<'t>>, ignored_attributes: :any | Set<Symbol> | nil, prohibited_attributes: Set<Symbol>) -> any
   def coerce: (any, ?path: ErrorPath) -> 't
 
   def ignore: (:any | Set<Symbol> | nil) -> self
   def ignore!: (:any | Set<Symbol> | nil) -> self
   def prohibit: (Set<Symbol>) -> self
   def prohibit!: (Set<Symbol>) -> self
-  def update_fields: <'x> { (Hash<Symbol, _Schema<any>>) -> void } -> Object<'x>
+  def update_fields: <'x> { (::Hash<Symbol, _Schema<any>>) -> void } -> Object<'x>
 end
 
 type StrongJSON::Type::detector = ^(any) -> _Schema<any>?
@@ -114,3 +114,12 @@ class StrongJSON::Type::UnexpectedAttributeError < StandardError
   def type: -> _Schema<any>
 end
 
+class StrongJSON::Type::Hash<'t>
+  include Match
+  include WithAlias
+
+  attr_reader type: _Schema<'t>
+
+  def initialize: (_Schema<'t>) -> any
+  def coerce: (any, ?path: ErrorPath) -> ::Hash<Symbol, 't>
+end

@@ -91,5 +91,13 @@ class StrongJSON
     def enum?(*types, detector: nil)
       optional(enum(*types, detector: detector))
     end
+
+    def hash(type)
+      StrongJSON::Type::Hash.new(type)
+    end
+
+    def hash?(type)
+      optional(hash(type))
+    end
   end
 end
