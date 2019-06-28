@@ -2,6 +2,10 @@
 
 ## master
 
+## 2.0.0 (2019-06-28)
+
+* [17](https://github.com/soutaro/strong_json/pull/17): Revise `Object` type _ignore_/_reject_ API
+
 ## 1.1.0 (2019-06-09)
 
 * [#15](https://github.com/soutaro/strong_json/pull/15): Add `hash` type
