@@ -192,13 +192,13 @@ class StrongJSON
       include Match
       include WithAlias
 
-      # @dynamic fields, ignored_attributes, prohibited_attributes
-      attr_reader :fields, :ignored_attributes, :prohibited_attributes
+      # @dynamic fields, on_unknown, exceptions
+      attr_reader :fields, :on_unknown, :exceptions
 
-      def initialize(fields, ignored_attributes:, prohibited_attributes:)
+      def initialize(fields, on_unknown:, exceptions:)
         @fields = fields
-        @ignored_attributes = ignored_attributes
-        @prohibited_attributes = prohibited_attributes
+        @on_unknown = on_unknown
+        @exceptions = exceptions
       end
 
       def coerce(object, path: ErrorPath.root(self))
@@ -206,32 +206,30 @@ class StrongJSON
           raise TypeError.new(path: path, value: object)
         end
 
-        unless (intersection = Set.new(object.keys).intersection(prohibited_attributes)).empty?
-          raise UnexpectedAttributeError.new(path: path, attribute: intersection.to_a.first)
-        end
+        object = object.dup
+        unknown_attributes = Set.new(object.keys) - fields.keys
 
-        case attrs = ignored_attributes
-        when :any
-          object = object.dup
-          extra_keys = Set.new(object.keys) - Set.new(fields.keys)
-          extra_keys.each do |key|
-            object.delete(key)
+        case on_unknown
+        when :reject
+          unknown_attributes.each do |attr|
+            if exceptions.member?(attr)
+              object.delete(attr)
+            else
+              raise UnexpectedAttributeError.new(path: path, attribute: attr)
+            end
           end
-        when Set
-          object = object.dup
-          attrs.each do |key|
-            object.delete(key)
+        when :ignore
+          unknown_attributes.each do |attr|
+            if exceptions.member?(attr)
+              raise UnexpectedAttributeError.new(path: path, attribute: attr)
+            else
+              object.delete(attr)
+            end
           end
         end
 
         # @type var result: ::Hash<Symbol, any>
         result = {}
-
-        object.each do |key, _|
-          unless fields.key?(key)
-            raise UnexpectedAttributeError.new(path: path, attribute: key)
-          end
-        end
 
         fields.each do |key, type|
           result[key] = type.coerce(object[key], path: path.dig(key: key, type: type))
@@ -240,29 +238,37 @@ class StrongJSON
         _ = result
       end
 
-      def ignore(attrs)
-        Object.new(fields, ignored_attributes: attrs, prohibited_attributes: prohibited_attributes)
+      # @type method ignore: (*Symbol, ?except: Set<Symbol>?) -> self
+      def ignore(*ignores, except: nil)
+        if ignores.empty? && !except
+          Object.new(fields, on_unknown: :ignore, exceptions: Set[])
+        else
+          if except
+            Object.new(fields, on_unknown: :ignore, exceptions: except)
+          else
+            Object.new(fields, on_unknown: :reject, exceptions: Set.new(ignores))
+          end
+        end
       end
 
-      def ignore!(attrs)
-        @ignored_attributes = attrs
-        self
-      end
-
-      def prohibit(attrs)
-        Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: attrs)
-      end
-
-      def prohibit!(attrs)
-        @prohibited_attributes = attrs
-        self
+      # @type method reject: (*Symbol, ?except: Set<Symbol>?) -> self
+      def reject(*rejecteds, except: nil)
+        if rejecteds.empty? && !except
+          Object.new(fields, on_unknown: :reject, exceptions: Set[])
+        else
+          if except
+            Object.new(fields, on_unknown: :reject, exceptions: except)
+          else
+            Object.new(fields, on_unknown: :ignore, exceptions: Set.new(rejecteds))
+          end
+        end
       end
 
       def update_fields
         fields.dup.yield_self do |fields|
           yield fields
 
-          Object.new(fields, ignored_attributes: ignored_attributes, prohibited_attributes: prohibited_attributes)
+          Object.new(fields, on_unknown: on_unknown, exceptions: exceptions)
         end
       end
 
@@ -278,8 +284,8 @@ class StrongJSON
         if other.is_a?(Object)
           # @type var other: Object<any>
           other.fields == fields &&
-            other.ignored_attributes == ignored_attributes &&
-            other.prohibited_attributes == prohibited_attributes
+            other.on_unknown == on_unknown &&
+            other.exceptions == exceptions
         end
       end
 

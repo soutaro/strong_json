@@ -3,9 +3,9 @@ class StrongJSON
     # @type method object: (?Hash<Symbol, ty>) -> Type::Object<any>
     def object(fields = {})
       if fields.empty?
-        Type::Object.new(fields, ignored_attributes: nil, prohibited_attributes: Set.new)
+        Type::Object.new(fields, on_unknown: :ignore, exceptions: Set.new)
       else
-        Type::Object.new(fields, ignored_attributes: :any, prohibited_attributes: Set.new)
+        Type::Object.new(fields, on_unknown: :reject, exceptions: Set.new)
       end
     end
 
