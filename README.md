@@ -59,26 +59,20 @@ If an attribute has a value which does not match with given type, the `coerce` m
 
 #### Ignoring unknown attributes
 
-`Object` type ignores unknown attributes by default.
-You can reject the unknown attributes.
+You can use `ignore` method to ignore unknown attributes.
 
 ```
-object(attrs).ignore(Set.new)       # Ignores nothing (== raise an error)
-object(attrs).ignore!(Set.new)      # Destructive version
+object(attrs).ignore()                     # Ignores all unknown attributes.
+object(attrs).ignore(:x, :y)               # Ignores :x and :y, but rejects other unknown attributes.
+object(attrs).ignore(except: Set[:x, :y])  # Rejects :x and :y, but ignores other unknown attributes.
 ```
 
-You can selectively ignore attributes:
+`Object` also provides `reject` method to do the opposite.
 
 ```
-object(attrs).ignore(Set.new([:a, :b, :c]))   # Ignores only :a, :b, and :c
-object(attrs).ignore(:any)                    # Ignores everything (default)
-```
-
-`Object` also has `prohibit` method to specify attributes to make the type check failed.
-
-```
-object(attrs).prohibit(Set.new([:created_at, :updated_at]))   # Make type check failed if :created_at or :updated_at included
-object(attrs).prohibit!(Set.new([:created_at, :updated_at]))  # Destructive version
+object(attrs).reject()                     # Rejects all unknown attributes. (default)
+object(attrs).reject(:x, :y)               # Rejects :x and :y, but ignores other unknown attributes.
+object(attrs).reject(except: Set[:x, :y])  # Ignores :x and :y, but rejects other unknown attributes.
 ```
 
 ### array(type)

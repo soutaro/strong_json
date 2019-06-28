@@ -60,16 +60,26 @@ class StrongJSON::Type::Object<'t>
   include WithAlias
 
   attr_reader fields: ::Hash<Symbol, _Schema<any>>
-  attr_reader ignored_attributes: :any | Set<Symbol> | nil
-  attr_reader prohibited_attributes: Set<Symbol>
+  attr_reader on_unknown: :ignore | :reject
+  attr_reader exceptions: Set<Symbol>
 
-  def initialize: (::Hash<Symbol, _Schema<'t>>, ignored_attributes: :any | Set<Symbol> | nil, prohibited_attributes: Set<Symbol>) -> any
+  def initialize: (::Hash<Symbol, _Schema<'t>>, on_unknown: :ignore | :reject, exceptions: Set<Symbol>) -> any
   def coerce: (any, ?path: ErrorPath) -> 't
 
-  def ignore: (:any | Set<Symbol> | nil) -> self
-  def ignore!: (:any | Set<Symbol> | nil) -> self
-  def prohibit: (Set<Symbol>) -> self
-  def prohibit!: (Set<Symbol>) -> self
+  # If no argument is given, it ignores all unknown attributes.
+  # If `Symbol`s are given, it ignores the listed attributes, but rejects if other unknown attributes are detected.
+  # If `except:` is specified, it rejects attributes listed in `except` are detected, but ignores other unknown attributes.
+  def ignore: () -> self
+            | (*Symbol) -> self
+            | (?except: Set<Symbol>) -> self
+
+  # If no argument is given, it rejects on any unknown attribute.
+  # If `Symbol`s are given, it rejects the listed attributes are detected, but ignores other unknown attributes.
+  # If `except:` is specified, it ignores given attributes, but rejects if other unknown attributes are detected.
+  def reject: () -> self
+            | (*Symbol) -> self
+            | (?except: Set<Symbol>) -> self
+
   def update_fields: <'x> { (::Hash<Symbol, _Schema<any>>) -> void } -> Object<'x>
 end
 

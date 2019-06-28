@@ -8,26 +8,11 @@ describe StrongJSON::Type::Object do
           a: StrongJSON::Type::Base.new(:numeric),
           b: StrongJSON::Type::Base.new(:string)
         },
-        ignored_attributes: nil,
-        prohibited_attributes: Set.new
+        on_unknown: :raise,
+        exceptions: Set.new
       )
 
       expect(type.coerce(a: 123, b: "test")).to eq(a: 123, b: "test")
-    end
-
-    it "rejects unspecified fields" do
-      type = StrongJSON::Type::Object.new(
-        {
-          a: StrongJSON::Type::Base.new(:numeric)
-        },
-        ignored_attributes: nil,
-        prohibited_attributes: Set.new
-      )
-
-      expect { type.coerce(a:123, b:true) }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
-        expect(e.path.to_s).to eq("$")
-        expect(e.attribute).to eq(:b)
-      }
     end
 
     it "rejects objects with missing fields" do
@@ -35,87 +20,61 @@ describe StrongJSON::Type::Object do
         {
           a: StrongJSON::Type::Base.new(:numeric)
         },
-        ignored_attributes: nil,
-        prohibited_attributes: Set.new
+        on_unknown: :reject,
+        exceptions: Set.new
       )
 
-      expect{ type.coerce(b: "test") }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
+      expect{ type.coerce(a: 123, b: "test") }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
         expect(e.path.to_s).to eq("$")
         expect(e.attribute).to eq(:b)
       }
     end
 
-    describe "ignored_attributes" do
-      context "when ignored_attributes are given as Set" do
-        let(:type) {
-          StrongJSON::Type::Object.new(
-            {
-              a: StrongJSON::Type::Base.new(:numeric)
-            },
-            ignored_attributes: Set.new([:b]),
-            prohibited_attributes: Set.new
-          )
-        }
-
-        it "ignores field with any value" do
-          expect(type.coerce(a: 123, b: true)).to eq(a: 123)
-        end
-
-        it "accepts if it does not contains the field" do
-          expect(type.coerce(a: 123)).to eq(a: 123)
-        end
-      end
-
-      context "when ignored_attributes is nil" do
-        let(:type) {
-          StrongJSON::Type::Object.new(
-            {
-              a: StrongJSON::Type::Base.new(:numeric)
-            },
-            ignored_attributes: nil,
-            prohibited_attributes: Set.new
-          )
-        }
-
-        it "ignores field with any value" do
-          expect {
-            type.coerce(a: 123, b: true)
-          }.to raise_error(StrongJSON::Type::UnexpectedAttributeError)
-        end
-      end
-
-      context "when ignored_attributes is :any" do
-        let(:type) {
-          StrongJSON::Type::Object.new(
-            {
-              a: StrongJSON::Type::Base.new(:numeric)
-            },
-            ignored_attributes: :any,
-            prohibited_attributes: Set.new
-          )
-        }
-
-        it "ignores field with any value" do
-          expect(type.coerce(a: 123, b: true)).to eq(a: 123)
-        end
-      end
-    end
-
-    describe "prohibited_attributes" do
+    context "when on_unknown is :ignore" do
       let(:type) {
         StrongJSON::Type::Object.new(
           {
             a: StrongJSON::Type::Base.new(:numeric)
           },
-          ignored_attributes: :any,
-          prohibited_attributes: Set.new([:x])
+          on_unknown: :ignore,
+          exceptions: Set[:x]
         )
       }
 
-      it "raises error if the attribute is given" do
+      it "ignores field with any value" do
+        expect(type.coerce(a: 123, b: true)).to eq(a: 123)
+      end
+
+      it "raises error on attributes listed in exceptions" do
         expect {
-          type.coerce(a:123, b:true, x: [])
-        }.to raise_error(StrongJSON::Type::UnexpectedAttributeError)
+          type.coerce(a: 123, x: false)
+        }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|error|
+          expect(error.attribute).to eq(:x)
+        }
+      end
+    end
+
+    context "when on_unknown is :reject" do
+      let(:type) {
+        StrongJSON::Type::Object.new(
+          {
+            a: StrongJSON::Type::Base.new(:numeric)
+          },
+          on_unknown: :reject,
+          exceptions: Set[:c]
+        )
+      }
+
+      it "raises with unknown attribute" do
+        expect {
+          type.coerce(a: 123, b: true)
+        }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|error|
+          expect(error.attribute).to eq(:b)
+        }
+      end
+
+      it "ignores attributes listed in exceptions" do
+        expect(type.coerce(a: 123, c: false)).to eq(a:123)
       end
     end
   end
@@ -126,8 +85,8 @@ describe StrongJSON::Type::Object do
         {
           a: StrongJSON::Type::Optional.new(StrongJSON::Type::Base.new(:numeric))
         },
-        ignored_attributes: nil,
-        prohibited_attributes: Set.new
+        on_unknown: :raise,
+        exceptions: Set[]
       )
     }
 
@@ -151,8 +110,8 @@ describe StrongJSON::Type::Object do
           a: StrongJSON::Type::Base.new(:numeric),
           b: StrongJSON::Type::Base.new(:string)
         },
-        ignored_attributes: nil,
-        prohibited_attributes: Set.new
+        on_unknown: :raise,
+        exceptions: Set[]
       )
     }
 
@@ -162,6 +121,75 @@ describe StrongJSON::Type::Object do
 
     it "returns false for invalid number" do
       expect(type =~ {}).to be_falsey
+    end
+  end
+
+  describe "#ignore" do
+    let (:type) {
+      StrongJSON::Type::Object.new(
+        { a: StrongJSON::Type::Base.new(:numeric) },
+        on_unknown: :raise,
+        exceptions: Set[]
+      )
+    }
+
+    context "if no argument is given" do
+      it "ignores all unknown attributes" do
+        updated_type = type.ignore()
+        expect(updated_type.on_unknown).to eq(:ignore)
+        expect(updated_type.exceptions).to eq(Set[])
+      end
+    end
+
+
+    context "if list of Symbol is given" do
+      it "ignores specified attributes but raises unknowns" do
+        updated_type = type.ignore(:x, :y)
+        expect(updated_type.on_unknown).to eq(:reject)
+        expect(updated_type.exceptions).to eq(Set[:x, :y])
+      end
+    end
+
+    context "if except keyword is specified" do
+      it "raises unknowns but ignores specified attributes" do
+        updated_type = type.ignore(except: Set[:x, :y])
+        expect(updated_type.on_unknown).to eq(:ignore)
+        expect(updated_type.exceptions).to eq(Set[:x, :y])
+      end
+    end
+  end
+
+  describe "#reject" do
+    let (:type) {
+      StrongJSON::Type::Object.new(
+        { a: StrongJSON::Type::Base.new(:numeric) },
+        on_unknown: :raise,
+        exceptions: Set[]
+      )
+    }
+
+    context "if no argument is given" do
+      it "raises on any unknown attribute" do
+        updated_type = type.reject()
+        expect(updated_type.on_unknown).to eq(:reject)
+        expect(updated_type.exceptions).to eq(Set[])
+      end
+    end
+
+    context "if list of Symbol is given" do
+      it "raises unknowns but ignores specified attributes" do
+        updated_type = type.reject(:x, :y)
+        expect(updated_type.on_unknown).to eq(:ignore)
+        expect(updated_type.exceptions).to eq(Set[:x, :y])
+      end
+    end
+
+    context "if except keyword is specified" do
+      it "ignores specified attributes but raises unknowns" do
+        updated_type = type.reject(except: Set[:x, :y])
+        expect(updated_type.on_unknown).to eq(:reject)
+        expect(updated_type.exceptions).to eq(Set[:x, :y])
+      end
     end
   end
 end

@@ -29,16 +29,16 @@ describe StrongJSON::Type::Enum do
               id: StrongJSON::Type::Literal.new("id1"),
               value: StrongJSON::Type::Base.new(:string)
             },
-            ignored_attributes: nil,
-            prohibited_attributes: Set.new
+            on_unknown: :raise,
+            exceptions: Set[]
           ),
           StrongJSON::Type::Object.new(
             {
               id: StrongJSON::Type::Base.new(:string),
               value: StrongJSON::Type::Base.new(:symbol)
             },
-            ignored_attributes: nil,
-            prohibited_attributes: Set.new
+            on_unknown: :raise,
+            exceptions: Set[]
           ),
           StrongJSON::Type::Optional.new(StrongJSON::Type::Literal.new(3)),
           StrongJSON::Type::Literal.new(false),
@@ -73,8 +73,8 @@ describe StrongJSON::Type::Enum do
             regexp: StrongJSON::Type::Base.new(:string),
             option: StrongJSON::Type::Base.new(:string),
           },
-          ignored_attributes: nil,
-          prohibited_attributes: Set.new
+          on_unknown: :raise,
+          exceptions: Set[]
         )
       }
 
@@ -83,8 +83,8 @@ describe StrongJSON::Type::Enum do
           {
             literal: StrongJSON::Type::Base.new(:string)
           },
-          ignored_attributes: nil,
-          prohibited_attributes: Set.new
+          on_unknown: :raise,
+          exceptions: Set[]
         )
       }
 
