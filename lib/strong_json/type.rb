@@ -15,7 +15,7 @@ class StrongJSON
 
     module WithAlias
       def alias
-        @alias
+        defined?(@alias) ? @alias : nil
       end
 
       def with_alias(name)

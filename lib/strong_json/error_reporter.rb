@@ -8,7 +8,7 @@ class StrongJSON
     end
 
     def to_s
-      format() unless @string
+      format() unless defined?(@string)
       @string
     end
 
