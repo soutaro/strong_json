@@ -12,7 +12,7 @@ module StrongJSON::Type::WithAlias: ::Object
   def with_alias: (Symbol) -> self
 end
 
-type StrongJSON::base_type_name = :any | :number | :string | :boolean | :numeric | :symbol
+type StrongJSON::base_type_name = :any | :number | :string | :boolean | :numeric | :symbol | :integer
 
 class StrongJSON::Type::Base<'a>
   include Match

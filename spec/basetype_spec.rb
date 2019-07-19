@@ -94,6 +94,18 @@ describe StrongJSON::Type::Base do
       end
     end
 
+    context ":integer" do
+      let (:type) { StrongJSON::Type::Base.new(:integer) }
+
+      it "accepts integer" do
+        expect(type.test(123)).to be_truthy
+      end
+
+      it "rejects float" do
+        expect(type.test(1.23)).to be_falsey
+      end
+    end
+
     context ":numeric" do
       let (:type) { StrongJSON::Type::Base.new(:numeric) }
 

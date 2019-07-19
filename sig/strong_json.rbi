@@ -38,6 +38,8 @@ module StrongJSON::Types
   def number?: () -> Type::Optional<Numeric>
   def numeric: () -> Type::Base<Numeric>
   def numeric?: () -> Type::Optional<Numeric>
+  def integer: () -> Type::Base<Integer>
+  def integer?: () -> Type::Optional<Integer>
   def boolean: () -> Type::Base<bool>
   def boolean?: () -> Type::Optional<bool>
   def symbol: () -> Type::Base<Symbol>

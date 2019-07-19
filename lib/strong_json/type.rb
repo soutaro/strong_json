@@ -44,6 +44,8 @@ class StrongJSON
           true
         when :number
           value.is_a?(Numeric)
+        when :integer
+          value.is_a?(Integer)
         when :string
           value.is_a?(String)
         when :boolean
