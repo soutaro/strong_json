@@ -117,6 +117,7 @@ enum(person,
 ### Base types
 
 * `number` The value must be an instance of `Numeric`
+* `integer` The value must be an instance of `Integer`
 * `string` The value must be an instance of `String`
 * `boolean` The value must be `true` or `false`
 * `numeric` The value must be an instance of `Numeric` or a string which represents a number
@@ -132,6 +133,7 @@ enum(person,
 There are some alias for `optional(base)`, where base is base types, as the following:
 
 * `number?`
+* `integer?`
 * `string?`
 * `boolean?`
 * `numeric?`

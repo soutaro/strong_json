@@ -31,6 +31,10 @@ class StrongJSON
       StrongJSON::Type::Base.new(:number)
     end
 
+    def integer
+      StrongJSON::Type::Base.new(:integer)
+    end
+
     def boolean
       StrongJSON::Type::Base.new(:boolean)
     end
@@ -61,6 +65,10 @@ class StrongJSON
 
     def numeric?
       optional(numeric)
+    end
+
+    def integer?
+      optional(integer)
     end
 
     def number?
