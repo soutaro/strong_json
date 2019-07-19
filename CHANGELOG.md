@@ -2,6 +2,10 @@
 
 ## master
 
+## 2.1.0 (2019-07-19)
+
+* [20](https://github.com/soutaro/strong_json/pull/20): Add `integer` type
+
 ## 2.0.0 (2019-06-28)
 
 * [17](https://github.com/soutaro/strong_json/pull/17): Revise `Object` type _ignore_/_reject_ API
