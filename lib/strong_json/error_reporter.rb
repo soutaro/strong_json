@@ -18,7 +18,7 @@ class StrongJSON
       format_trace(path: path)
       where = format_aliases(path: path, where: [])
 
-      # @type var ty: Type::Enum<any>
+      # @type var ty: Type::Enum[any]
       if (ty = _ = path.type).is_a?(Type::Enum)
         ty.types.each do |t|
           if (a = t.alias)
