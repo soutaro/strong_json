@@ -20,7 +20,7 @@ class StrongJSON
 
       def with_alias(name)
         _ = dup.tap do |copy|
-          copy.instance_eval do
+          copy.instance_eval do |x|
             @alias = name
           end
         end
