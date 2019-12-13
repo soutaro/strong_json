@@ -47,7 +47,7 @@ If the input JSON data conforms to `order`'s structure, the `json` will be that 
 
 If the input JSON contains attributes which is not white-listed in the definition, it will raise an exception.
 
-If an attribute has a value which does not match with given type, the `coerce` method call will raise an exception `StrongJSON::Type::Error`.
+If an attribute has a value which does not match with given type, the `coerce` method call will raise an exception `StrongJSON::Type::TypeError`.
 
 ## Catalogue of Types
 
