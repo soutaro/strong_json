@@ -1,6 +1,5 @@
 class StrongJSON
   module Types
-    # @type method object: (?Hash<Symbol, ty>) -> Type::Object<any>
     def object(fields = {})
       if fields.empty?
         Type::Object.new(fields, on_unknown: :ignore, exceptions: Set.new)
@@ -9,12 +8,10 @@ class StrongJSON
       end
     end
 
-    # @type method array: (?ty) -> Type::Array<any>
     def array(type = any)
       Type::Array.new(type)
     end
 
-    # @type method optional: (?ty) -> Type::Optional<any>
     def optional(type = any)
       Type::Optional.new(type)
     end
@@ -87,7 +84,6 @@ class StrongJSON
       optional(array(ty))
     end
 
-    # @type method object?: (?Hash<Symbol, ty>) -> Type::Optional<any>
     def object?(fields={})
       optional(object(fields))
     end

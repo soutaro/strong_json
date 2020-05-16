@@ -6,11 +6,11 @@ RSpec::Core::RakeTask.new(:spec)
 task :default => [:spec, :typecheck, :"example:typecheck"]
 
 task :typecheck do
-  sh "bundle exec steep check --strict lib"
+  sh "bundle exec steep check"
 end
 
 namespace :example do
   task :typecheck do
-    sh "bundle exec steep check --strict -I sig -I example example"
+    sh "bundle exec steep check --steepfile=example/Steepfile"
   end
 end

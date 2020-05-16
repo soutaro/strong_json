@@ -20,7 +20,7 @@ class StrongJSON
 
       def with_alias(name)
         _ = dup.tap do |copy|
-          copy.instance_eval do
+          copy.instance_eval do |x|
             @alias = name
           end
         end
@@ -76,7 +76,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Base)
-          # @type var other: Base<any>
           other.type == type
         end
       end
@@ -111,7 +110,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Optional)
-          # @type var other: Optional<any>
           other.type == type
         end
       end
@@ -143,7 +141,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Literal)
-          # @type var other: Literal<any>
           other.value == value
         end
       end
@@ -180,7 +177,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Array)
-          # @type var other: Array<any>
           other.type == type
         end
       end
@@ -230,7 +226,7 @@ class StrongJSON
           end
         end
 
-        # @type var result: ::Hash<Symbol, any>
+        # @type var result: ::Hash[Symbol, untyped]
         result = {}
 
         fields.each do |key, type|
@@ -240,7 +236,6 @@ class StrongJSON
         _ = result
       end
 
-      # @type method ignore: (*Symbol, ?except: Set<Symbol>?) -> self
       def ignore(*ignores, except: nil)
         if ignores.empty? && !except
           Object.new(fields, on_unknown: :ignore, exceptions: Set[])
@@ -253,7 +248,6 @@ class StrongJSON
         end
       end
 
-      # @type method reject: (*Symbol, ?except: Set<Symbol>?) -> self
       def reject(*rejecteds, except: nil)
         if rejecteds.empty? && !except
           Object.new(fields, on_unknown: :reject, exceptions: Set[])
@@ -284,7 +278,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Object)
-          # @type var other: Object<any>
           other.fields == fields &&
             other.on_unknown == on_unknown &&
             other.exceptions == exceptions
@@ -333,7 +326,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Enum)
-          # @type var other: Enum<any>
           other.types == types &&
             other.detector == detector
         end
@@ -369,7 +361,6 @@ class StrongJSON
 
       def ==(other)
         if other.is_a?(Hash)
-          # @type var other: Hash<any>
           other.type == type
         end
       end

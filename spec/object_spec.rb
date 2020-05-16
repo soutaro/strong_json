@@ -8,7 +8,7 @@ describe StrongJSON::Type::Object do
           a: StrongJSON::Type::Base.new(:numeric),
           b: StrongJSON::Type::Base.new(:string)
         },
-        on_unknown: :raise,
+        on_unknown: :reject,
         exceptions: Set.new
       )
 
@@ -85,7 +85,7 @@ describe StrongJSON::Type::Object do
         {
           a: StrongJSON::Type::Optional.new(StrongJSON::Type::Base.new(:numeric))
         },
-        on_unknown: :raise,
+        on_unknown: :reject,
         exceptions: Set[]
       )
     }
@@ -110,7 +110,7 @@ describe StrongJSON::Type::Object do
           a: StrongJSON::Type::Base.new(:numeric),
           b: StrongJSON::Type::Base.new(:string)
         },
-        on_unknown: :raise,
+        on_unknown: :reject,
         exceptions: Set[]
       )
     }
@@ -128,7 +128,7 @@ describe StrongJSON::Type::Object do
     let (:type) {
       StrongJSON::Type::Object.new(
         { a: StrongJSON::Type::Base.new(:numeric) },
-        on_unknown: :raise,
+        on_unknown: :reject,
         exceptions: Set[]
       )
     }
@@ -163,7 +163,7 @@ describe StrongJSON::Type::Object do
     let (:type) {
       StrongJSON::Type::Object.new(
         { a: StrongJSON::Type::Base.new(:numeric) },
-        on_unknown: :raise,
+        on_unknown: :reject,
         exceptions: Set[]
       )
     }

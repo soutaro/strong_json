@@ -18,7 +18,7 @@ class StrongJSON
       format_trace(path: path)
       where = format_aliases(path: path, where: [])
 
-      # @type var ty: Type::Enum<any>
+      # @type var ty: Type::Enum[untyped]
       if (ty = _ = path.type).is_a?(Type::Enum)
         ty.types.each do |t|
           if (a = t.alias)
@@ -67,7 +67,7 @@ class StrongJSON
     end
 
     def format_single_alias(name, type)
-      # @type const PrettyPrint: any
+      # @type const PrettyPrint: untyped
       PrettyPrint.format do |pp|
         pp.text(name.to_s)
         pp.text(" = ")
@@ -78,7 +78,7 @@ class StrongJSON
     end
 
     def pretty_str(type, expand_alias: false)
-      # @type const PrettyPrint: any
+      # @type const PrettyPrint: untyped
       PrettyPrint.singleline_format do |pp|
         pretty(type, pp, expand_alias: expand_alias)
       end
