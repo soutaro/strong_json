@@ -2,6 +2,10 @@
 
 ## master
 
+## 2.1.1 (2020-05-16)
+
+* [24](https://github.com/soutaro/strong_json/pull/24): Ship with RBS
+
 ## 2.1.0 (2019-07-19)
 
 * [20](https://github.com/soutaro/strong_json/pull/20): Add `integer` type
