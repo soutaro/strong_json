@@ -1,0 +1,8 @@
+target :app do
+  signature "sig"
+  signature "../sig"
+
+  check "lib"
+
+  library "set"
+end

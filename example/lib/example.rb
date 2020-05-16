@@ -12,7 +12,7 @@ person = Schema.person.coerce(nil)
 # @type var name: String
 name = person[:name]
 
-# @type var contacts: Array<email | address>
+# @type var contacts: Array[email | address]
 contacts = person[:contacts]
 
 contacts.each do |contact|
