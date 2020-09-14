@@ -79,7 +79,7 @@ class StrongJSON::Type::Object[T]
   def update_fields: [X] { (::Hash[Symbol, _Schema[untyped]]) -> void } -> Object[X]
 end
 
-type StrongJSON::Type::detector = ^(untyped) -> _Schema[untyped]?
+type StrongJSON::Type::Enum::detector = ^(untyped) -> StrongJson::_Schema[untyped]
 
 class StrongJSON::Type::Enum[T]
   include Match
