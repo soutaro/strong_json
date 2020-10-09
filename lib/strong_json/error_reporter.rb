@@ -67,7 +67,6 @@ class StrongJSON
     end
 
     def format_single_alias(name, type)
-      # @type const PrettyPrint: untyped
       PrettyPrint.format do |pp|
         pp.text(name.to_s)
         pp.text(" = ")
@@ -78,7 +77,6 @@ class StrongJSON
     end
 
     def pretty_str(type, expand_alias: false)
-      # @type const PrettyPrint: untyped
       PrettyPrint.singleline_format do |pp|
         pretty(type, pp, expand_alias: expand_alias)
       end

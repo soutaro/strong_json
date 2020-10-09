@@ -46,7 +46,7 @@ class StrongJSON
     def literal?: [X] (X) -> Type::Optional[X]
     def enum: [X] (*_Schema[untyped], ?detector: Type::detector?) -> Type::Enum[X]
     def enum?: [X] (*_Schema[untyped], ?detector: Type::detector?) -> Type::Optional[X]
-    incompatible def hash: [X] (_Schema[X]) -> Type::Hash[X]
+    def hash: [X] (_Schema[X]) -> Type::Hash[X]
     def hash?: [X] (_Schema[X]) -> Type::Optional[Hash[Symbol, X]]
   end
 
@@ -62,6 +62,6 @@ class StrongJSON
     def format_trace: (path: Type::ErrorPath, ?index: Integer) -> void
     def format_aliases: (path: Type::ErrorPath, where: ::Array[String]) -> ::Array[String]
     def format_single_alias: (Symbol, ty) -> String
-    def pretty: (ty, untyped, ?expand_alias: bool) -> void
+    def pretty: (ty, PrettyPrint, ?expand_alias: bool) -> void
   end
 end

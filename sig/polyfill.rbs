@@ -1,0 +1,13 @@
+class PrettyPrint
+  def text: (String) -> void
+
+  def group: (?Integer, ?String, ?String) { () -> void } -> void
+
+  def nest: (Integer) { () -> void } -> void
+
+  def breakable: (String) -> void
+
+  def self.format: { (instance) -> void } -> String
+
+  def self.singleline_format: { (instance) -> void } -> String
+end
