@@ -2,6 +2,10 @@
 
 ## master
 
+## 2.1.2
+
+* Update Steep
+
 ## 2.1.1 (2020-05-16)
 
 * [24](https://github.com/soutaro/strong_json/pull/24): Ship with RBS
