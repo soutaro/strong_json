@@ -20,11 +20,11 @@ describe "StrongJSON.new" do
     end
 
     expect(
-      s.checkout.coerce(items: [{ name: "test", count: 1, price: "2.33", comment: "dummy" }], type: 1)
+      s.checkout.coerce({ items: [{ name: "test", count: 1, price: "2.33", comment: "dummy" }], type: 1 })
     ).to eq(items: [ { name: "test", count: 1, price: "2.33" }], type: 1, change: nil, customer: nil)
 
     expect {
-      s.checkout.coerce(items: [{ name: "test", count: 1, price: [], comment: "dummy" }], type: 1)
+      s.checkout.coerce({ items: [{ name: "test", count: 1, price: [], comment: "dummy" }], type: 1 })
     }.to raise_error(StrongJSON::Type::TypeError) {|e|
       expect(e.path.to_s).to eq("$.items[0].price")
       expect(e.type).to be_a(StrongJSON::Type::Base)
@@ -58,7 +58,7 @@ MSG
     }
 
     expect {
-      s.checkout.coerce(items: [], change: "", type: 1)
+      s.checkout.coerce({ items: [], change: "", type: 1 })
     }.to raise_error(StrongJSON::Type::TypeError) {|e|
       expect(e.path.to_s).to eq("$.change")
       expect(e.type).to be_a(StrongJSON::Type::Base)
@@ -94,14 +94,14 @@ MSG
       let :enum, object(e1: enum(boolean, number), e2: enum?(literal(1), literal(2)))
     end
 
-    expect(s.enum.coerce(e1: false)).to eq(e1: false, e2: nil)
-    expect(s.enum.coerce(e1: 0)).to eq(e1: 0, e2: nil)
-    expect(s.enum.coerce(e1: 0, e2: 1)).to eq(e1: 0, e2: 1)
-    expect(s.enum.coerce(e1: 0, e2: 2)).to eq(e1: 0, e2: 2)
-    expect{ s.enum.coerce(e1: "", e2: 3) }.to raise_error(StrongJSON::Type::TypeError) {|e|
+    expect(s.enum.coerce({ e1: false })).to eq(e1: false, e2: nil)
+    expect(s.enum.coerce({ e1: 0 })).to eq(e1: 0, e2: nil)
+    expect(s.enum.coerce({ e1: 0, e2: 1 })).to eq(e1: 0, e2: 1)
+    expect(s.enum.coerce({ e1: 0, e2: 2 })).to eq(e1: 0, e2: 2)
+    expect{ s.enum.coerce({ e1: "", e2: 3 }) }.to raise_error(StrongJSON::Type::TypeError) {|e|
       expect(e.path.to_s).to eq("$.e1")
     }
-    expect{ s.enum.coerce(e1: false, e2: "") }.to raise_error(StrongJSON::Type::TypeError) {|e|
+    expect{ s.enum.coerce({ e1: false, e2: ""} ) }.to raise_error(StrongJSON::Type::TypeError) {|e|
       expect(e.path.to_s).to eq("$.e2")
     }
   end

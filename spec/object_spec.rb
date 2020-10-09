@@ -12,7 +12,7 @@ describe StrongJSON::Type::Object do
         exceptions: Set.new
       )
 
-      expect(type.coerce(a: 123, b: "test")).to eq(a: 123, b: "test")
+      expect(type.coerce({ a: 123, b: "test" })).to eq(a: 123, b: "test")
     end
 
     it "rejects objects with missing fields" do
@@ -24,7 +24,7 @@ describe StrongJSON::Type::Object do
         exceptions: Set.new
       )
 
-      expect{ type.coerce(a: 123, b: "test") }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
+      expect{ type.coerce({ a: 123, b: "test" }) }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|e|
         expect(e.path.to_s).to eq("$")
         expect(e.attribute).to eq(:b)
       }
@@ -42,12 +42,12 @@ describe StrongJSON::Type::Object do
       }
 
       it "ignores field with any value" do
-        expect(type.coerce(a: 123, b: true)).to eq(a: 123)
+        expect(type.coerce({ a: 123, b: true })).to eq(a: 123)
       end
 
       it "raises error on attributes listed in exceptions" do
         expect {
-          type.coerce(a: 123, x: false)
+          type.coerce({ a: 123, x: false })
         }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|error|
           expect(error.attribute).to eq(:x)
         }
@@ -67,14 +67,14 @@ describe StrongJSON::Type::Object do
 
       it "raises with unknown attribute" do
         expect {
-          type.coerce(a: 123, b: true)
+          type.coerce({ a: 123, b: true })
         }.to raise_error(StrongJSON::Type::UnexpectedAttributeError) {|error|
           expect(error.attribute).to eq(:b)
         }
       end
 
       it "ignores attributes listed in exceptions" do
-        expect(type.coerce(a: 123, c: false)).to eq(a:123)
+        expect(type.coerce({ a: 123, c: false })).to eq(a:123)
       end
     end
   end
