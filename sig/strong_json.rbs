@@ -46,7 +46,7 @@ class StrongJSON
     def literal?: [X] (X) -> Type::Optional[X]
     def enum: [X] (*_Schema[untyped], ?detector: Type::detector?) -> Type::Enum[X]
     def enum?: [X] (*_Schema[untyped], ?detector: Type::detector?) -> Type::Optional[X]
-    incompatible def hash: [X] (_Schema[X]) -> Type::Hash[X]
+    def hash: [X] (_Schema[X]) -> Type::Hash[X]
     def hash?: [X] (_Schema[X]) -> Type::Optional[Hash[Symbol, X]]
   end
 
