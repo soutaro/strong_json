@@ -1,3 +1,4 @@
+require "set"
 require "strong_json/version"
 require "strong_json/type"
 require "strong_json/types"
