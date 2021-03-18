@@ -77,6 +77,8 @@ class StrongJSON
       def ==(other)
         if other.is_a?(Base)
           other.type == type
+        else
+          super
         end
       end
 
@@ -111,6 +113,8 @@ class StrongJSON
       def ==(other)
         if other.is_a?(Optional)
           other.type == type
+        else
+          super
         end
       end
 
@@ -178,6 +182,8 @@ class StrongJSON
       def ==(other)
         if other.is_a?(Array)
           other.type == type
+        else
+          super
         end
       end
 
@@ -281,6 +287,8 @@ class StrongJSON
           other.fields == fields &&
             other.on_unknown == on_unknown &&
             other.exceptions == exceptions
+        else
+          super
         end
       end
 
@@ -328,6 +336,8 @@ class StrongJSON
         if other.is_a?(Enum)
           other.types == types &&
             other.detector == detector
+        else
+          super
         end
       end
 
@@ -362,6 +372,8 @@ class StrongJSON
       def ==(other)
         if other.is_a?(Hash)
           other.type == type
+        else
+          super
         end
       end
     end
