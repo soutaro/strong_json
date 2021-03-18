@@ -13,12 +13,13 @@ jobs:
       matrix:
         container_tag:
         - master-nightly-bionic
-        - 2.6.5-bionic
-        - 2.7.0-bionic
+        - 2.6-bionic
+        - 2.7-bionic
+        - 3.0-focal
     container:
       image: rubylang/ruby:${{ matrix.container_tag }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Install
       run: |
         ruby -v
